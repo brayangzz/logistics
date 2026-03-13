@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   },
   {
     path: "/chofer",
-    label: "Rutas y Envíos",
+    label: "Chofer",
     icon: Truck,
   },
 ];

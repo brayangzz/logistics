@@ -27,7 +27,6 @@ export default function LogisticsPage() {
 
   return (
     <div className="w-full min-h-screen">
-      {/* Eliminamos max-w-7xl mx-auto y usamos w-full para un diseño fluido */}
       <div className="w-full p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
 
         {/* Header Section */}

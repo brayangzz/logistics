@@ -17,7 +17,7 @@ export const LogisticsTable = ({ orders, isLoading, totalCount }: LogisticsTable
   return (
     <div className="bg-[#1E293A]/40 rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden backdrop-blur-xl relative">
       {/* Subtle top highlight */}
-      <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-[#155DFC]/20 to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#155DFC]/20 to-transparent" />
 
       {/* Column Headers (Hidden on Mobile) */}
       <div className="hidden md:grid grid-cols-12 gap-4 px-8 py-5 border-b border-slate-700/50 bg-[#1B2638] text-[11px] font-bold text-slate-300 uppercase tracking-widest">
@@ -31,7 +31,8 @@ export const LogisticsTable = ({ orders, isLoading, totalCount }: LogisticsTable
 
       {/* Rows List */}
       <div className="divide-y divide-slate-700/50">
-        <AnimatePresence>
+        {/* Añadido mode="popLayout" para evitar saltos raros al filtrar */}
+        <AnimatePresence mode="popLayout">
           {isLoading ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -56,11 +57,16 @@ export const LogisticsTable = ({ orders, isLoading, totalCount }: LogisticsTable
             orders.map((order, i) => (
               <motion.div
                 key={order.id}
-                layout
-                initial={{ opacity: 0, y: 15 }}
+                // ELIMINÉ LA PROPIEDAD "layout" que causaba los rebotes
+                // ANIMACIÓN AJUSTADA: Más corta (y: 8), más rápida, y con easeOut
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.4, delay: i * 0.05, ease: [0.23, 1, 0.32, 1] }}
+                transition={{
+                  duration: 0.3,
+                  delay: i * 0.04, // Retraso en cascada un poco más rápido
+                  ease: "easeOut"
+                }}
                 className={cn(
                   "group flex flex-col md:grid md:grid-cols-12 gap-y-4 gap-x-4 px-5 py-5 md:px-8 md:py-6 items-center transition-all duration-500 ease-out",
                   "hover:bg-[#1B2638] relative",

@@ -55,8 +55,8 @@ export default function ChoferPage() {
               <Truck className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight uppercase">
-              <span className="text-white">Entregas</span>{" "}
-              <span className="text-[#155DFC]">del Día</span>
+              <span className="text-white">Pedidos</span>{" "}
+              <span className="text-[#155DFC]">Asignados</span>
             </h1>
           </div>
 
@@ -101,7 +101,8 @@ export default function ChoferPage() {
         {/* Columna Derecha: Detalles de Factura Activa */}
         <div className="lg:col-span-8 xl:col-span-9 space-y-6 lg:space-y-8 pb-12">
           {activeInvoice ? (
-            <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            // CAMBIO APLICADO AQUÍ: Quitamos animate-in y agregamos el key
+            <div key={activeInvoice.id} className="flex flex-col gap-6">
               <div className="w-full">
                 <ChoferClientInfoCard invoice={activeInvoice} />
               </div>
