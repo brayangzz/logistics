@@ -1,38 +1,40 @@
 "use client";
 
 import { Package } from "lucide-react";
-import { 
-  LogisticsFiltersPanel, 
-  LogisticsLegend, 
+import {
+  LogisticsFiltersPanel,
+  LogisticsLegend,
   LogisticsTable,
-  useLogisticsPageState, 
-  useLogisticsQuery 
+  useLogisticsPageState,
+  useLogisticsQuery
 } from "@/features/logistics";
 
 export default function LogisticsPage() {
   const { data: initialOrders, isLoading } = useLogisticsQuery();
-  const { 
-    searchTerm, 
-    setSearchTerm, 
-    statusFilter, 
-    setStatusFilter, 
-    sortBy, 
-    setSortBy, 
-    dateRange, 
-    setDateRange, 
-    filteredOrders 
+  const {
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    setStatusFilter,
+    sortBy,
+    setSortBy,
+    dateRange,
+    setDateRange,
+    filteredOrders
   } = useLogisticsPageState(initialOrders);
 
   const pendingCount = initialOrders.filter(o => o.overallState === "Pendiente").length;
 
   return (
-    <div className="w-full">
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 md:space-y-8">
+    <div className="w-full min-h-screen">
+      {/* Eliminamos max-w-7xl mx-auto y usamos w-full para un diseño fluido */}
+      <div className="w-full p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
+
         {/* Header Section */}
-        <div className="flex flex-col gap-5 md:flex-row md:items-end justify-between">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end justify-between">
           <div className="space-y-1 relative z-10">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-b from-[#155DFC] to-blue-700 shadow-[0_0_20px_rgba(21,93,252,0.3)]">
+              <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-b from-[#155DFC] to-blue-700 shadow-[0_0_20px_rgba(21,93,252,0.3)]">
                 <Package className="w-6 h-6 text-white" />
                 <div className="absolute inset-0 rounded-xl ring-1 ring-white/20" />
               </div>
@@ -46,9 +48,9 @@ export default function LogisticsPage() {
             </p>
           </div>
 
-          <LogisticsFiltersPanel 
-            searchTerm={searchTerm} 
-            onSearchChange={setSearchTerm} 
+          <LogisticsFiltersPanel
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
             sortBy={sortBy}
             onSortChange={setSortBy}
             dateRange={dateRange}
@@ -56,14 +58,14 @@ export default function LogisticsPage() {
           />
         </div>
 
-        <LogisticsLegend 
+        <LogisticsLegend
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
         />
 
-        <LogisticsTable 
-          orders={filteredOrders} 
-          isLoading={isLoading} 
+        <LogisticsTable
+          orders={filteredOrders}
+          isLoading={isLoading}
           totalCount={initialOrders.length}
         />
       </div>
