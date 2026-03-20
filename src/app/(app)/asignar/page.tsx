@@ -4,7 +4,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from "react"
 import {
   Search, MapPin, ChevronDown, Check, Map as MapIcon,
   Pencil, Package, UserPlus, X, Route, Weight, Calendar,
-  CheckCircle2, TrendingUp,
+  CheckCircle2, TrendingUp, Warehouse, Truck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -208,7 +208,7 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
   const totalW = order.warehouses.length;
   const doneW  = order.anticipatedDone ?? 0;
   const pct    = totalW > 0 ? Math.round((doneW/totalW)*100) : 0;
-  const assignH = stage === "pending" ? 108 : 48;
+  const assignH = stage === "pending" ? 130 : 60;
 
   return (
     <motion.div
@@ -223,139 +223,145 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
       whileHover={open ? {} : { y:-3, transition:{ ...SPRING } }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="rounded-3xl flex flex-col"
+      className="flex flex-col"
       style={{
         position:"relative", zIndex: open ? 40 : 1,
         backgroundColor:"var(--bg-secondary)",
-        border:`1px solid ${hovered ? s.color+"50" : "var(--border-color)"}`,
+        borderRadius: 24,
+        borderTop:`3px solid ${s.color}`,
+        borderLeft:`1px solid ${hovered ? s.color+"55" : "var(--border-color)"}`,
+        borderRight:`1px solid ${hovered ? s.color+"55" : "var(--border-color)"}`,
+        borderBottom:`1px solid ${hovered ? s.color+"55" : "var(--border-color)"}`,
         boxShadow: hovered
-          ? `0 0 0 3px ${s.color}14, 0 12px 40px rgba(0,0,0,0.18)`
-          : "0 2px 8px rgba(0,0,0,0.08)",
+          ? `0 0 0 3px ${s.color}18, 0 16px 48px rgba(0,0,0,0.2)`
+          : "0 2px 12px rgba(0,0,0,0.1)",
         transition:"border-color 0.2s ease, box-shadow 0.2s ease",
+        overflow:"visible",
       }}
     >
-      <div className="p-6 flex flex-col gap-5">
+      <div style={{ padding:24, display:"flex", flexDirection:"column", gap:18 }}>
 
-        {/* Número + estado */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xl font-bold tracking-tight" style={{ color:"var(--text-primary)" }}>
+        {/* ── Row 1: Factura + estado ── */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color:"var(--text-primary)" }}>
               {order.invoiceNumber}
             </span>
-            <div className="h-5 flex items-center">
-              {order.anticipated ? (
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md"
-                  style={{ background:"rgba(245,158,11,0.12)", color:"#F59E0B", border:"1px solid rgba(245,158,11,0.22)" }}>
-                  Anticipado
-                </span>
-              ) : (
-                <span className="invisible text-[11px] px-2 py-0.5">·</span>
-              )}
-            </div>
+            {order.anticipated && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0"
+                style={{ backgroundColor:"#F59E0B", color:"#fff" }}>
+                Anticipado
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shrink-0 mt-0.5"
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0"
             style={{ backgroundColor:s.bg, border:`1px solid ${s.border}` }}>
             {order.state === "Pendiente" ? (
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inset-0 rounded-full opacity-50" style={{ backgroundColor:s.color }} />
                 <span className="relative h-2 w-2 rounded-full" style={{ backgroundColor:s.color }} />
               </span>
             ) : (
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor:s.color }} />
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor:s.color }} />
             )}
-            <span className="text-xs font-semibold leading-none" style={{ color:s.color }}>{s.label}</span>
+            <span className="text-[11px] font-bold leading-none" style={{ color:s.color }}>{s.label}</span>
           </div>
         </div>
 
-        {/* Cliente */}
-        <div className="flex items-center gap-3.5">
-          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold shrink-0", av(order.clientInitials))}>
+        {/* ── Row 2: Cliente ── */}
+        <div className="flex items-center gap-3 p-3 rounded-2xl"
+          style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)" }}>
+          <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center text-[13px] font-extrabold shrink-0", av(order.clientInitials))}>
             {order.clientInitials}
           </div>
-          <div className="min-w-0">
-            <p className="text-base font-semibold leading-snug truncate" style={{ color:"var(--text-primary)" }}>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-bold leading-tight truncate" style={{ color:"var(--text-primary)" }}>
               {order.clientName}
             </p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <MapPin className="w-3.5 h-3.5 shrink-0" style={{ color:"var(--text-muted)" }} strokeWidth={1.8} />
-              <p className="text-sm truncate" style={{ color:"var(--text-muted)" }}>{order.clientAddress}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <MapPin className="w-3 h-3 shrink-0" style={{ color:"#155DFC" }} strokeWidth={2.5} />
+              <p className="text-[12px] truncate" style={{ color:"var(--text-secondary)" }}>{order.clientAddress}</p>
             </div>
           </div>
         </div>
 
-        {/* Meta */}
+        {/* ── Row 3: Meta grid ── */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { icon:<Route    className="w-3.5 h-3.5 text-[#155DFC]" strokeWidth={1.5}/>, label:"Bloque", value:block.shortName },
-            { icon:<Weight   className="w-3.5 h-3.5 text-[#155DFC]" strokeWidth={1.5}/>, label:"Peso",   value:`${order.totalWeight} kg` },
-            { icon:<Calendar className="w-3.5 h-3.5 text-[#155DFC]" strokeWidth={1.5}/>, label:"Fecha",  value:order.date },
-          ].map(({ icon, label, value }) => (
-            <div key={label} className="flex flex-col gap-1.5 px-3 py-2.5 rounded-2xl border"
+            { icon:<Route    className="w-4 h-4" strokeWidth={2}/>, label:"Bloque", value:block.shortName, color:"#155DFC" },
+            { icon:<Weight   className="w-4 h-4" strokeWidth={2}/>, label:"Peso",   value:`${order.totalWeight} kg`, color:"#8B5CF6" },
+            { icon:<Calendar className="w-4 h-4" strokeWidth={2}/>, label:"Fecha",  value:order.date, color:"#F59E0B" },
+          ].map(({ icon, label, value, color }) => (
+            <div key={label} className="flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl border"
               style={{ backgroundColor:"var(--bg-tertiary)", borderColor:"var(--border-color)" }}>
-              <div className="flex items-center gap-1.5">
-                {icon}
-                <span className="text-[10px] font-bold uppercase tracking-widest leading-none" style={{ color:"var(--text-muted)" }}>{label}</span>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor:color+"18" }}>
+                {React.cloneElement(icon, { style:{ color } })}
               </div>
-              <span className="text-sm font-semibold leading-none" style={{ color:"var(--text-primary)" }}>{value}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color:"var(--text-secondary)" }}>{label}</span>
+              <span className="text-[13px] font-extrabold leading-none" style={{ color:"var(--text-primary)" }}>{value}</span>
             </div>
           ))}
         </div>
 
-        {/* Almacenes + barra */}
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-1.5">
+        {/* ── Row 4: Almacenes ── */}
+        <div className="flex flex-col gap-2.5">
+          <div className="grid gap-2" style={{ gridTemplateColumns:`repeat(${order.warehouses.length}, 1fr)` }}>
             {order.warehouses.map(w => (
-              <span key={w} className="text-[13px] font-medium px-3 py-1 rounded-xl"
-                style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)", color:"var(--text-secondary)" }}>
-                {w}
-              </span>
+              <div key={w}
+                className="flex items-center justify-center gap-1.5 py-2 rounded-xl border text-center"
+                style={{ backgroundColor:"var(--bg-tertiary)", borderColor:"var(--border-color)" }}>
+                <Warehouse className="w-3.5 h-3.5 shrink-0" style={{ color:"#155DFC" }} strokeWidth={2} />
+                <span className="text-[12px] font-bold" style={{ color:"var(--text-primary)" }}>{w}</span>
+              </div>
             ))}
           </div>
-          <div style={{ height: 36 }}>
-            {order.anticipated && (
-              <div className="flex flex-col gap-2 h-full justify-center">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium" style={{ color:"var(--text-muted)" }}>Preparado</span>
-                  <span className="text-xs font-bold tabular-nums"
-                    style={{ color: pct===100 ? "#10B981" : "var(--text-secondary)" }}>{doneW}/{totalW}</span>
-                </div>
-                <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor:"var(--border-color)" }}>
-                  <motion.div className="h-full rounded-full"
-                    style={{ backgroundColor: pct===100 ? "#10B981" : "#3B82F6" }}
-                    initial={{ width:0 }} animate={{ width:`${pct}%` }}
-                    transition={{ duration:0.6, ease:[0.25,0.46,0.45,0.94], delay:0.1 }}
-                  />
-                </div>
+
+          {/* Barra de progreso anticipados */}
+          {order.anticipated && (
+            <div className="flex flex-col gap-2 px-3 py-2.5 rounded-xl"
+              style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold" style={{ color:"var(--text-secondary)" }}>Preparación</span>
+                <span className="text-[11px] font-extrabold tabular-nums"
+                  style={{ color: pct===100 ? "#10B981" : "#3B82F6" }}>{doneW}/{totalW}</span>
               </div>
-            )}
-          </div>
+              <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ backgroundColor:"var(--border-color)" }}>
+                <motion.div className="h-full rounded-full"
+                  style={{ backgroundColor: pct===100 ? "#10B981" : "#3B82F6" }}
+                  initial={{ width:0 }} animate={{ width:`${pct}%` }}
+                  transition={{ duration:0.6, ease:[0.25,0.46,0.45,0.94], delay:0.1 }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Separador */}
-        <div className="h-px -mx-6" style={{ backgroundColor:"var(--border-color)" }} />
+        {/* ── Separador ── */}
+        <div style={{ height:1, margin:"0 -24px", backgroundColor:"var(--border-color)" }} />
 
-        {/* Asignación */}
-        <div className="relative overflow-visible" ref={ref}
-          style={{ height: assignH, transition:"height 0.22s cubic-bezier(0.4,0,0.2,1)" }}>
+        {/* ── Row 5: Asignación ── */}
+        <div className="relative" ref={ref}
+          style={{ height: assignH, transition:"height 0.22s cubic-bezier(0.4,0,0.2,1)", overflow:"visible" }}>
           <AnimatePresence mode="sync" initial={false}>
 
             {stage === "empty" && (
               <motion.div key="empty" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                 transition={{ duration:0.12 }} className="absolute inset-x-0 top-0">
                 <button onClick={() => setOpen(v => !v)}
-                  className="w-full flex items-center justify-between h-12 px-4 rounded-2xl text-[15px] font-medium focus:outline-none"
+                  className="w-full flex items-center justify-between px-4 rounded-2xl text-[13px] font-bold focus:outline-none"
                   style={{
-                    backgroundColor: open ? "var(--accent-bg)" : "var(--bg-tertiary)",
-                    border:`1px solid ${open ? "var(--accent-border)" : "var(--border-color)"}`,
-                    color: open ? "var(--accent)" : "var(--text-secondary)",
-                    transition:"background-color 0.15s, border-color 0.15s, color 0.15s",
+                    height: 52,
+                    backgroundColor: open ? "#155DFC" : "var(--bg-tertiary)",
+                    border:`1px solid ${open ? "#155DFC" : "var(--border-color)"}`,
+                    color: open ? "#fff" : "var(--text-primary)",
+                    transition:"all 0.15s",
                   }}>
                   <div className="flex items-center gap-2.5">
-                    <UserPlus className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+                    <Truck className="w-4 h-4 shrink-0" strokeWidth={2} />
                     <span>Asignar chofer</span>
                   </div>
                   <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration:0.2, ease:[0.4,0,0.2,1] }}>
-                    <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
+                    <ChevronDown className="w-4 h-4" strokeWidth={2} />
                   </motion.div>
                 </button>
               </motion.div>
@@ -363,29 +369,32 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
 
             {stage === "pending" && pending && (
               <motion.div key="pending" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-                transition={{ duration:0.12 }} className="absolute inset-x-0 top-0 flex flex-col gap-2">
-                <div className="flex items-center gap-3 px-4 h-14 rounded-2xl"
-                  style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid rgba(251,191,36,0.3)" }}>
-                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0", av(pending.initials))}>
+                transition={{ duration:0.12 }} className="absolute inset-x-0 top-0 flex flex-col" style={{ gap:14 }}>
+                <div className="flex items-center gap-3 px-4 rounded-2xl"
+                  style={{ height:54, backgroundColor:"var(--bg-tertiary)", border:"2px solid #F59E0B" }}>
+                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-extrabold shrink-0", av(pending.initials))}>
                     {pending.initials}
                   </div>
-                  <span className="text-[15px] font-semibold flex-1 truncate" style={{ color:"var(--text-primary)" }}>
+                  <span className="text-[13px] font-bold flex-1 truncate" style={{ color:"var(--text-primary)" }}>
                     {pending.name}
                   </span>
-                  <span className="text-xs font-medium shrink-0" style={{ color:"#FBBF24" }}>Sin guardar</span>
+                  <span className="text-[10px] font-bold shrink-0 px-2 py-0.5 rounded-md"
+                    style={{ backgroundColor:"#F59E0B", color:"#fff" }}>
+                    Sin guardar
+                  </span>
                 </div>
-                <div className="flex gap-2" style={{ height:42 }}>
-                  <motion.button whileHover={{ filter:"brightness(1.08)" }} whileTap={{ scale:0.97 }}
+                <div className="flex gap-2.5" style={{ height:48 }}>
+                  <motion.button whileHover={{ filter:"brightness(1.1)" }} whileTap={{ scale:0.97 }}
                     onClick={handleSave}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl text-[15px] font-semibold text-white"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl text-[13px] font-bold text-white"
                     style={{ backgroundColor:"#059669" }}>
                     <Check className="w-4 h-4" strokeWidth={2.5} />
                     Guardar
                   </motion.button>
                   <motion.button whileTap={{ scale:0.97 }}
                     onClick={() => { setPendingId(null); setOpen(false); }}
-                    className="w-12 flex items-center justify-center rounded-2xl shrink-0"
-                    style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)", color:"var(--text-muted)" }}>
+                    className="flex items-center justify-center rounded-2xl shrink-0"
+                    style={{ width:48, backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)", color:"var(--text-secondary)" }}>
                     <X className="w-4 h-4" strokeWidth={2} />
                   </motion.button>
                 </div>
@@ -395,22 +404,28 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
             {stage === "saved" && saved && (
               <motion.div key="saved" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                 transition={{ duration:0.12 }} className="absolute inset-x-0 top-0">
-                <div className="flex items-center gap-3 px-4 h-12 rounded-2xl"
-                  style={{ backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)" }}>
-                  <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0", av(saved.initials))}>
+                <div className="flex items-center gap-3 px-4 rounded-2xl"
+                  style={{ height:60, backgroundColor:"var(--bg-tertiary)", border:"1px solid var(--border-color)" }}>
+                  <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-[12px] font-extrabold shrink-0", av(saved.initials))}>
                     {saved.initials}
                   </div>
-                  <span className="text-[15px] font-semibold flex-1 truncate" style={{ color:"var(--text-primary)" }}>
-                    {saved.name}
-                  </span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[13px] font-bold leading-tight block truncate" style={{ color:"var(--text-primary)" }}>
+                      {saved.name}
+                    </span>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Truck className="w-3 h-3 shrink-0" style={{ color:"#10B981" }} strokeWidth={2.5} />
+                      <span className="text-[11px] font-semibold" style={{ color:"#10B981" }}>Asignado</span>
+                    </div>
+                  </div>
                   <motion.button whileHover={{ scale:1.08 }} whileTap={{ scale:0.92 }}
                     onClick={() => setOpen(v => !v)}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl shrink-0"
+                    className="w-9 h-9 flex items-center justify-center rounded-xl shrink-0"
                     style={{
-                      backgroundColor: open ? "var(--accent)" : "var(--accent-bg)",
-                      border:"1px solid var(--accent-border)",
-                      color: open ? "#fff" : "var(--accent)",
-                      transition:"background-color 0.15s, color 0.15s",
+                      backgroundColor: open ? "#155DFC" : "var(--bg-secondary)",
+                      border:"1px solid var(--border-color)",
+                      color: open ? "#fff" : "#155DFC",
+                      transition:"all 0.15s",
                     }}>
                     <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
                   </motion.button>
@@ -424,19 +439,19 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
           <AnimatePresence>
             {open && (
               <motion.div
-                initial={{ opacity:0, y:-8, scale:0.96 }}
+                initial={{ opacity:0, y:-6, scale:0.97 }}
                 animate={{ opacity:1, y:0,  scale:1    }}
-                exit={{    opacity:0, y:-8, scale:0.96 }}
+                exit={{    opacity:0, y:-6,  scale:0.97 }}
                 transition={{ ...SPRING }}
-                className="absolute left-0 right-0 top-full mt-2 z-[200] rounded-2xl overflow-hidden"
+                className="absolute left-0 right-0 top-full mt-3 z-[500] rounded-2xl overflow-hidden"
                 style={{
                   backgroundColor:"var(--bg-secondary)",
                   border:"1px solid var(--border-hover)",
-                  boxShadow:"var(--dropdown-shadow)",
+                  boxShadow:"0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.05)",
                 }}>
-                <div className="px-4 py-3 flex items-center gap-2 border-b" style={{ borderColor:"var(--border-color)" }}>
-                  <Package className="w-3.5 h-3.5" style={{ color:"var(--text-muted)" }} strokeWidth={1.5} />
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color:"var(--text-muted)" }}>{block.name}</span>
+                <div className="px-4 py-2.5 flex items-center gap-2 border-b" style={{ borderColor:"var(--border-color)" }}>
+                  <Package className="w-3.5 h-3.5" style={{ color:"#155DFC" }} strokeWidth={2} />
+                  <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color:"var(--text-secondary)" }}>{block.name}</span>
                 </div>
                 <div className="p-2 flex flex-col gap-0.5">
                   {block.drivers.map((d, i) => (
@@ -707,7 +722,7 @@ export default function AsignarPage() {
         </AnimatePresence>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" style={{ overflow:"visible" }}>
           <AnimatePresence mode="popLayout">
             {filtered.map((order, i) => (
               <InvoiceCard key={order.id} order={order} onAssign={handleAssign}
