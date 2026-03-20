@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Calendar, ArrowUpDown, ChevronDown } from "lucide-react";
+import { Search, ArrowUpDown } from "lucide-react";
 import { SortOrder, DateRange } from "../hooks/useLogisticsPageState";
-import { cn } from "@/lib/utils";
+import { CustomSelect } from "@/components/ui/CustomSelect";
+import { MiniCalendar } from "@/components/ui/MiniCalendar";
 
 interface LogisticsFiltersProps {
   searchTerm: string;
@@ -11,58 +12,83 @@ interface LogisticsFiltersProps {
   onSortChange: (value: SortOrder) => void;
   dateRange: DateRange;
   onDateChange: (value: DateRange) => void;
+  selectedDate: Date | null;
+  onCalendarDateChange: (date: Date | null) => void;
 }
 
-export const LogisticsFiltersPanel = ({ 
-  searchTerm, 
-  onSearchChange, 
-  sortBy, 
+const SORT_OPTIONS = [
+  { value: "Recientes", label: "Más recientes" },
+  { value: "Antiguos", label: "Más antiguos" },
+];
+
+const DATE_RANGE_OPTIONS = [
+  { value: "Todos", label: "Todas las fechas" },
+  { value: "7d", label: "Últimos 7 días" },
+  { value: "30d", label: "Últimos 30 días" },
+];
+
+export const LogisticsFiltersPanel = ({
+  searchTerm,
+  onSearchChange,
+  sortBy,
   onSortChange,
   dateRange,
-  onDateChange
+  onDateChange,
+  selectedDate,
+  onCalendarDateChange,
 }: LogisticsFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10 mt-2 md:mt-0">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10 mt-2 md:mt-0 flex-wrap">
       {/* Search Input */}
       <div className="relative group w-full sm:w-auto flex-1 md:flex-none">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-[#155DFC] transition-colors" />
+        <Search
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors group-focus-within:text-[#155DFC]"
+          style={{ color: "var(--text-secondary)" }}
+        />
         <input
+          id="search-orders"
           type="text"
           placeholder="Buscar factura o cliente..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 pr-4 py-2.5 w-full sm:w-[280px] bg-[#1E293A]/50 border border-slate-700/50 rounded-xl text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/50 focus:border-[#155DFC]/50 transition-all backdrop-blur-md shadow-inner"
+          className="pl-10 pr-4 py-2.5 w-full sm:w-[260px] border rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
+          style={{
+            backgroundColor: "var(--bg-input)",
+            borderColor: "var(--border-color)",
+            color: "var(--text-primary)",
+          }}
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        {/* Sort Filter */}
-        <div className="relative w-full sm:w-auto flex-1">
-          <ArrowUpDown className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-          <select
+      <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+        {/* Sort Filter - Custom Select */}
+        <div className="flex-1 sm:flex-none min-w-[150px]">
+          <CustomSelect
+            id="sort-select"
             value={sortBy}
-            onChange={(e) => onSortChange(e.target.value as SortOrder)}
-            className="appearance-none pl-10 pr-10 py-2.5 w-full sm:w-[140px] bg-[#1E293A]/50 border border-slate-700/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#155DFC]/50 focus:border-[#155DFC]/50 transition-all backdrop-blur-md shadow-inner cursor-pointer"
-          >
-            <option value="Recientes">Recientes</option>
-            <option value="Antiguos">Antiguos</option>
-          </select>
-          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+            onChange={(v) => onSortChange(v as SortOrder)}
+            options={SORT_OPTIONS}
+            icon={<ArrowUpDown className="w-4 h-4" />}
+          />
         </div>
 
-        {/* Date Filter */}
-        <div className="relative w-full sm:w-auto flex-1">
-          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-          <select
+        {/* Date Range - Custom Select */}
+        <div className="flex-1 sm:flex-none min-w-[160px]">
+          <CustomSelect
+            id="date-range-select"
             value={dateRange}
-            onChange={(e) => onDateChange(e.target.value as DateRange)}
-            className="appearance-none pl-10 pr-10 py-2.5 w-full sm:w-[160px] bg-[#1E293A]/50 border border-slate-700/50 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#155DFC]/50 focus:border-[#155DFC]/50 transition-all backdrop-blur-md shadow-inner cursor-pointer"
-          >
-            <option value="Todos">Todas las fechas</option>
-            <option value="7d">Últimos 7 días</option>
-            <option value="30d">Últimos 30 días</option>
-          </select>
-          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+            onChange={(v) => onDateChange(v as DateRange)}
+            options={DATE_RANGE_OPTIONS}
+          />
+        </div>
+
+        {/* Mini Calendar - Date Picker */}
+        <div className="flex-1 sm:flex-none min-w-[180px]">
+          <MiniCalendar
+            id="calendar-picker"
+            selectedDate={selectedDate}
+            onDateChange={onCalendarDateChange}
+          />
         </div>
       </div>
     </div>

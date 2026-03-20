@@ -7,6 +7,7 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   weightPerUnit: number; // in kg
+  section?: string; // e.g. "A3", "Caballete 1"
 }
 
 export interface ClientInfo {

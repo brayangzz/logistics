@@ -10,43 +10,60 @@ interface ChoferTopStatusCardProps {
 
 export const ChoferTopStatusCard = ({ invoice }: ChoferTopStatusCardProps) => {
   return (
-    <div className="bg-[#1E293A]/40 rounded-3xl border border-slate-700/50 shadow-2xl p-6 md:p-8 backdrop-blur-md relative overflow-hidden group">
-      <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-[#155DFC]/40 to-transparent" />
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-[#155DFC]/10 rounded-full blur-2xl group-hover:bg-[#155DFC]/20 transition-all duration-500" />
-      
+    <div
+      className="rounded-2xl border p-5 md:p-7 relative overflow-hidden group"
+      style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}
+    >
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#155DFC]/40 to-transparent" />
+      <div className="absolute -right-6 -top-6 w-28 h-28 bg-[#155DFC]/8 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500" />
+
       <div className="flex items-start justify-between relative z-10">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-linear-to-b from-[#1E293A] to-[#1B2638] border border-slate-700/50 shadow-inner flex items-center justify-center shrink-0">
-            <Package className="w-7 h-7 text-[#155DFC]" />
+          <div
+            className="w-12 h-12 rounded-xl border flex items-center justify-center shrink-0"
+            style={{ backgroundColor: "var(--bg-input)", borderColor: "var(--border-color)" }}
+          >
+            <Package className="w-6 h-6 text-[#155DFC]" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Factura de Ruta</h2>
-            <div className="text-3xl font-extrabold text-white flex items-center gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "var(--text-muted)" }}>
+              Factura de Ruta
+            </h2>
+            <div className="text-2xl font-extrabold flex items-center gap-3" style={{ color: "var(--text-primary)" }}>
               {invoice.invoiceNumber}
               <OverallBadge state={invoice.overallState} />
             </div>
           </div>
         </div>
-        <div className="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl bg-[#155DFC]/10 text-[#155DFC] ring-1 ring-[#155DFC]/30">
-          <Truck className="w-6 h-6" />
+        <div
+          className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl border"
+          style={{ backgroundColor: "rgba(21,93,252,0.08)", borderColor: "rgba(21,93,252,0.2)" }}
+        >
+          <Truck className="w-5 h-5 text-[#155DFC]" />
         </div>
       </div>
 
-      <div className="mt-8 pt-6 border-t border-slate-700/50">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Estado por Almacén</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3 bg-[#1B2638] p-3 rounded-xl border border-slate-700/50">
-            <span className="text-sm font-medium text-slate-300 w-20">Aluminio</span>
-            <StateIndicator state={invoice.areas.aluminio} />
-          </div>
-          <div className="flex items-center gap-3 bg-[#1B2638] p-3 rounded-xl border border-slate-700/50">
-            <span className="text-sm font-medium text-slate-300 w-20">Vidrio</span>
-            <StateIndicator state={invoice.areas.vidrio} />
-          </div>
-          <div className="flex items-center gap-3 bg-[#1B2638] p-3 rounded-xl border border-slate-700/50">
-            <span className="text-sm font-medium text-slate-300 w-20">Herrajes</span>
-            <StateIndicator state={invoice.areas.herrajes} />
-          </div>
+      <div className="mt-6 pt-5 border-t" style={{ borderColor: "var(--border-color)" }}>
+        <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>
+          Estado por Almacén
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { label: "Aluminio", state: invoice.areas.aluminio },
+            { label: "Vidrio",   state: invoice.areas.vidrio },
+            { label: "Herrajes", state: invoice.areas.herrajes },
+          ].map(({ label, state }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 p-3 rounded-xl border"
+              style={{ backgroundColor: "var(--bg-input)", borderColor: "var(--border-color)" }}
+            >
+              <span className="text-sm font-semibold w-20" style={{ color: "var(--text-secondary)" }}>
+                {label}
+              </span>
+              <StateIndicator state={state} />
+            </div>
+          ))}
         </div>
       </div>
     </div>

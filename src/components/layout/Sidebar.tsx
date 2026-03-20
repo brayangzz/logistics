@@ -2,21 +2,43 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import { LayoutDashboard, Truck, LogOut, PackageSearch } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LayoutDashboard,
+  Truck,
+  LogOut,
+  PackageSearch,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  ClipboardCheck,
+} from "lucide-react";
+import { useTheme } from "@/lib/ThemeContext";
+import { useAuth } from "@/lib/AuthContext";
 
 const NAV_ITEMS = [
   {
     path: "/logistics",
     label: "Logística",
     icon: LayoutDashboard,
+    matchPrefix: "/logistics",
+    roles: ["logistica"],
+  },
+  {
+    path: "/asignar",
+    label: "Asignar",
+    icon: ClipboardCheck,
+    matchPrefix: "/asignar",
+    roles: ["logistica"],
   },
   {
     path: "/chofer",
-    label: "Chofer",
+    label: "Mis entregas",
     icon: Truck,
+    matchPrefix: "/chofer",
+    roles: ["chofer"],
   },
 ];
 
@@ -26,92 +48,299 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Botón de Hamburguesa (Solo visible en Móvil) */}
+      {/* Botón Hamburguesa Móvil */}
       <button
         onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-[40] w-12 h-12 rounded-xl bg-[#111827] border border-slate-700/50 flex items-center justify-center text-white shadow-lg shadow-black/20 hover:bg-[#1E293B] transition-all group"
+        className="lg:hidden fixed top-4 left-4 z-[40] w-12 h-12 rounded-xl border flex items-center justify-center shadow-lg transition-all group active:scale-95"
+        style={{
+          backgroundColor: "var(--bg-sidebar)",
+          borderColor: "var(--border-color)",
+          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+        }}
       >
-        <LayoutDashboard className="w-5 h-5 text-slate-300 group-hover:text-[#155DFC] transition-colors" />
+        <Menu
+          className="w-6 h-6 transition-colors group-hover:text-[#155DFC]"
+          style={{ color: "var(--text-secondary)" }}
+        />
       </button>
 
-      {/* Fondo oscuro al abrir el menú (Solo visible en Móvil) */}
-      <div
-        onClick={() => setIsOpen(false)}
-        className={cn(
-          "lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] transition-opacity duration-300",
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-[280px] h-screen border-r flex flex-col overflow-hidden z-[60]"
+              style={{
+                backgroundColor: "var(--bg-sidebar)",
+                borderColor: "var(--sidebar-border)",
+                boxShadow: "10px 0 40px -10px rgba(0,0,0,0.5)",
+              }}
+            >
+              <SidebarContent
+                pathname={pathname}
+                onClose={() => setIsOpen(false)}
+                isMobile
+              />
+            </motion.aside>
+          </>
         )}
-      />
+      </AnimatePresence>
 
-      {/* Sidebar - Fijo en Desktop, deslizable en Móvil */}
+      {/* Desktop Sidebar */}
       <aside
-        className={cn(
-          "fixed lg:relative left-0 top-0 bottom-0 w-[280px] h-screen bg-[#0B1120] border-r border-slate-800 flex flex-col justify-between overflow-hidden shadow-[10px_0_30px_-15px_rgba(0,0,0,0.5)] z-[60] transition-transform duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] lg:translate-x-0",
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        )}
+        className="hidden lg:flex relative w-[280px] h-screen border-r flex-col overflow-hidden z-[60]"
+        style={{
+          backgroundColor: "var(--bg-sidebar)",
+          borderColor: "var(--sidebar-border)",
+          boxShadow: "10px 0 30px -15px rgba(0,0,0,0.3)",
+        }}
       >
-
-        {/* Cabecera / Logo */}
-        <div className="h-24 flex items-center px-6 border-b border-slate-800/80">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_15px_rgba(21,93,252,0.3)] flex items-center justify-center shrink-0">
-              <PackageSearch className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 text-xl tracking-wider uppercase">
-              COMPERS
-            </span>
-          </div>
-        </div>
-
-        {/* Navegación */}
-        <nav className="flex-1 py-8 px-4 flex flex-col gap-2">
-          {NAV_ITEMS.map((item) => {
-            const isActive = pathname.startsWith(item.path);
-            return (
-              <Link key={item.path} href={item.path} onClick={() => setIsOpen(false)}>
-                <div
-                  className={cn(
-                    "relative flex items-center gap-4 w-full px-4 py-3.5 rounded-xl transition-all duration-300 group cursor-pointer",
-                    isActive
-                      ? "text-white"
-                      : "text-slate-400 hover:bg-[#111827] hover:text-white"
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="active-sidebar-pill"
-                      className="absolute inset-0 bg-[#155DFC] rounded-xl shadow-[0_4px_15px_rgba(21,93,252,0.25)]"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-
-                  <div className="relative z-10 shrink-0">
-                    <item.icon className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
-                  </div>
-                  <span className="relative z-10 font-semibold text-sm">
-                    {item.label}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Pie del Sidebar (Usuario) */}
-        <div className="p-6 border-t border-slate-800/80 bg-[#111827]/30">
-          <div className="flex items-center gap-3 rounded-2xl transition-colors cursor-pointer group">
-            <div className="w-11 h-11 rounded-full bg-slate-800 border-2 border-slate-700 shrink-0 flex items-center justify-center overflow-hidden relative">
-              <span className="text-sm font-bold text-slate-200">AD</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-white leading-tight">Admin User</span>
-              <span className="text-xs text-slate-400">Administrador</span>
-            </div>
-            <LogOut className="w-5 h-5 text-slate-500 hover:text-red-400 ml-auto transition-colors duration-300" />
-          </div>
-        </div>
-
+        <SidebarContent pathname={pathname} />
       </aside>
     </>
+  );
+};
+
+const SidebarContent = ({
+  pathname,
+  onClose,
+  isMobile = false,
+}: {
+  pathname: string;
+  onClose?: () => void;
+  isMobile?: boolean;
+}) => {
+  const { toggleTheme, isDark } = useTheme();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => user && item.roles.includes(user.role)
+  );
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div
+        className="h-[72px] flex items-center justify-between px-5 border-b shrink-0"
+        style={{ borderColor: "var(--sidebar-border)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_15px_rgba(21,93,252,0.35)] flex items-center justify-center shrink-0">
+            <PackageSearch className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" />
+          </div>
+          <span
+            className="font-black text-base tracking-widest uppercase"
+            style={{
+              background:
+                "linear-gradient(to right, var(--text-primary), var(--text-secondary))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            COMPERS
+          </span>
+        </div>
+        {isMobile && (
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:opacity-70"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 py-6 px-3 flex flex-col gap-1 overflow-y-auto">
+        <p
+          className="text-[10px] font-bold uppercase tracking-widest px-3 mb-3"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Módulos
+        </p>
+
+        {visibleItems.map((item) => {
+          const isActive = pathname.startsWith(item.matchPrefix);
+
+          return (
+            <Link key={item.path} href={item.path} onClick={onClose}>
+              <div
+                className="relative flex items-center gap-3.5 w-full px-3.5 py-3 rounded-xl transition-all duration-200 group cursor-pointer"
+                style={{
+                  color: isActive ? "#FFFFFF" : "var(--text-muted)",
+                }}
+              >
+                {/* Active pill */}
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebar-active-pill"
+                    className="absolute inset-0 rounded-xl"
+                    style={{
+                      backgroundColor: "#155DFC",
+                      boxShadow: "0 4px 20px rgba(21,93,252,0.3)",
+                    }}
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+
+                {!isActive && (
+                  <motion.div
+                    className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ backgroundColor: "#155DFC" }}
+                  />
+                )}
+
+                <div
+                  className="relative z-10 shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200"
+                  style={{
+                    backgroundColor: isActive
+                      ? "rgba(255,255,255,0.15)"
+                      : "var(--accent-bg)",
+                  }}
+                >
+                  <item.icon
+                    className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
+                    style={{ color: isActive ? "#FFFFFF" : "#155DFC" }}
+                  />
+                </div>
+                <span className="relative z-10 font-semibold text-sm tracking-tight">
+                  {item.label}
+                </span>
+
+                {isActive && (
+                  <motion.div
+                    className="relative z-10 ml-auto w-1.5 h-1.5 rounded-full bg-white/70"
+                    layoutId="sidebar-active-dot"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Theme Toggle */}
+      <div className="px-3 pb-3 shrink-0">
+        <div
+          className="flex items-center justify-between p-3 rounded-xl border transition-all"
+          style={{
+            backgroundColor: "var(--bg-input)",
+            borderColor: "var(--border-color)",
+          }}
+        >
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+              style={{
+                backgroundColor: isDark
+                  ? "rgba(21,93,252,0.15)"
+                  : "rgba(245,158,11,0.12)",
+              }}
+            >
+              {isDark ? (
+                <Moon className="w-4 h-4 text-[#155DFC]" />
+              ) : (
+                <Sun className="w-4 h-4 text-amber-500" />
+              )}
+            </div>
+            <div className="flex flex-col">
+              <span
+                className="text-xs font-bold leading-tight"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {isDark ? "Modo Oscuro" : "Modo Claro"}
+              </span>
+              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                Activo
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            id="theme-toggle"
+            aria-label="Cambiar tema"
+            className="relative w-11 h-6 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40 shrink-0"
+            style={{ backgroundColor: isDark ? "#155DFC" : "#CBD5E1" }}
+          >
+            <motion.div
+              className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-md"
+              animate={{ left: isDark ? "22px" : "2px" }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* User Footer */}
+      <div
+        className="p-4 border-t shrink-0"
+        style={{
+          borderColor: "var(--sidebar-border)",
+          backgroundColor: isDark
+            ? "rgba(17,24,39,0.4)"
+            : "rgba(241,245,249,0.6)",
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-full border-2 shrink-0 flex items-center justify-center"
+            style={{
+              borderColor: "var(--border-color)",
+              backgroundColor: isDark ? "#1E293B" : "#E2E8F0",
+            }}
+          >
+            <span
+              className="text-xs font-bold"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {user?.initials ?? "??"}
+            </span>
+          </div>
+          <div className="flex flex-col flex-1 min-w-0">
+            <span
+              className="text-sm font-bold leading-tight truncate"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {user?.name ?? "Usuario"}
+            </span>
+            <span
+              className="text-[11px] truncate"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {user?.roleLabel ?? ""}
+            </span>
+          </div>
+          <button
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+            className="group p-1.5 rounded-lg transition-colors hover:bg-red-500/10"
+          >
+            <LogOut
+              className="w-4 h-4 transition-colors duration-200 group-hover:text-red-400"
+              style={{ color: "var(--text-muted)" }}
+            />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };

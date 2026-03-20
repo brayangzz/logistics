@@ -3,3 +3,5 @@ export * from "./StateIndicator";
 export * from "./LogisticsFiltersPanel";
 export * from "./LogisticsLegend";
 export * from "./LogisticsTable";
+export * from "./AnticipatedOrdersTable";
+

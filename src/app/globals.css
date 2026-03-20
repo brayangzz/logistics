@@ -1,3 +1,131 @@
 @import "tailwindcss";
 
-/* Añade tus variables CSS y custom properties aquí */
+/* ==========================================
+   VARIABLES DE TEMA - MODO OSCURO (default)
+   ========================================== */
+:root,
+html.dark-mode {
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293A;
+  --bg-tertiary: #1B2638;
+  --bg-sidebar: #0B1120;
+  --bg-card: #1E293A;
+  --bg-input: rgba(30, 41, 58, 0.5);
+  --border-color: rgba(100, 116, 139, 0.3);
+  --border-hover: rgba(100, 116, 139, 0.6);
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #7A90A8;
+  --accent: #155DFC;
+  --accent-hover: #2563EB;
+  --accent-bg: rgba(21, 93, 252, 0.1);
+  --accent-border: rgba(21, 93, 252, 0.3);
+  --sidebar-border: #1E293B;
+  --table-header-bg: #1B2638;
+  --table-row-hover: #1B2638;
+  --footer-bg: #1B2638;
+  --calendar-bg: #1E293A;
+  --calendar-hover: rgba(255,255,255,0.05);
+  --calendar-selected: #155DFC;
+  --calendar-today: rgba(21,93,252,0.15);
+  --dropdown-bg: #1B2638;
+  --dropdown-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  --select-option-hover: rgba(21,93,252,0.15);
+  --radial-bg: rgba(21, 93, 252, 0.15);
+  --table-row-bg: rgba(30, 41, 58, 0.4);
+}
+
+/* ==========================================
+   VARIABLES DE TEMA - MODO CLARO
+   ========================================== */
+html.light-mode {
+  --bg-primary: #F1F5F9;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F8FAFC;
+  --bg-sidebar: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-input: rgba(241, 245, 249, 0.8);
+  --border-color: rgba(148, 163, 184, 0.4);
+  --border-hover: rgba(100, 116, 139, 0.6);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --accent: #155DFC;
+  --accent-hover: #2563EB;
+  --accent-bg: rgba(21, 93, 252, 0.08);
+  --accent-border: rgba(21, 93, 252, 0.25);
+  --sidebar-border: #E2E8F0;
+  --table-header-bg: #F8FAFC;
+  --table-row-hover: #F1F5F9;
+  --footer-bg: #F8FAFC;
+  --calendar-bg: #FFFFFF;
+  --calendar-hover: rgba(21,93,252,0.05);
+  --calendar-selected: #155DFC;
+  --calendar-today: rgba(21,93,252,0.1);
+  --dropdown-bg: #FFFFFF;
+  --dropdown-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  --select-option-hover: rgba(21,93,252,0.08);
+  --radial-bg: rgba(21, 93, 252, 0.07);
+  --table-row-bg: rgba(255,255,255,0.7);
+}
+
+/* ==========================================
+   BASE — tamaño consistente en Brave / Chrome
+   ========================================== */
+html {
+  font-size: 17px;          /* +1px vs default → compensa reducción de Brave */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  zoom: 1;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Escala mínima de texto para todo el sistema */
+p, span, a, li, td, th, label, button, input, select, textarea {
+  font-size: max(0.875rem, 14px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ==========================================
+   CUSTOM SELECT DROPDOWN ANIMATION
+   ========================================== */
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dropdown-enter {
+  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Calendar animation */
+@keyframes calendarIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.calendar-enter {
+  animation: calendarIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
