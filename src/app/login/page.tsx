@@ -442,15 +442,16 @@ export default function LoginPage() {
           <span className="font-black text-xl tracking-widest uppercase text-white">COMPERS</span>
         </motion.div>
 
-        {/* Form card — shake wrapper */}
+        {/* Form card — entrance wrapper */}
         <motion.div
-          animate={shakeControls}
           className="relative w-full"
           style={{ maxWidth: "520px", padding: "0 32px" }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
         >
+        {/* Shake wrapper */}
+        <motion.div animate={shakeControls}>
           {/* Glow halo */}
           <div className="absolute -inset-4 rounded-[32px] pointer-events-none" style={{
             background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(21,93,252,0.08), transparent 70%)",
@@ -627,6 +628,7 @@ export default function LoginPage() {
               background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.2) 40%, rgba(96,165,250,0.12) 60%, transparent)",
             }} />
           </div>
+        </motion.div>
         </motion.div>
 
         {/* Footer */}
