@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ export const CustomSelect = ({
   id,
 }: CustomSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const selectedOption = options.find((o) => o.value === value);
 
@@ -44,6 +45,22 @@ export const CustomSelect = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const calcDropdownStyle = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const minWidth = rect.width;
+    const spaceRight = window.innerWidth - rect.left;
+    const useRight = spaceRight < 180;
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: useRight ? undefined : rect.left,
+      right: useRight ? window.innerWidth - rect.right : undefined,
+      minWidth,
+      zIndex: 9999,
+    });
+  }, []);
+
   const handleSelect = (val: string) => {
     onChange(val);
     setIsOpen(false);
@@ -54,10 +71,10 @@ export const CustomSelect = ({
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => { calcDropdownStyle(); setIsOpen((prev) => !prev); }}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 w-full focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
+        className="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 w-full min-w-[150px] focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
         style={{
           backgroundColor: "var(--bg-input)",
           borderColor: isOpen ? "rgba(21,93,252,0.5)" : "var(--border-color)",
@@ -92,8 +109,9 @@ export const CustomSelect = ({
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             role="listbox"
-            className="absolute top-full left-0 mt-2 min-w-full w-max z-[100] rounded-xl border overflow-hidden"
+            className="rounded-xl border overflow-hidden"
             style={{
+              ...dropdownStyle,
               backgroundColor: "var(--dropdown-bg)",
               borderColor: "var(--border-color)",
               boxShadow: "var(--dropdown-shadow)",

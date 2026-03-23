@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
 } from "react";
 
@@ -65,9 +66,12 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Lazy initializer — reads localStorage once synchronously on first render.
-  // No useEffect needed, so no extra render cycle.
-  const [user, setUser] = useState<AuthUser | null>(readStoredUser);
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  // Read localStorage after hydration to avoid SSR mismatch
+  useEffect(() => {
+    setUser(readStoredUser());
+  }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     const entry = USERS[username.toLowerCase()];

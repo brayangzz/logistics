@@ -38,9 +38,9 @@ export const LogisticsFiltersPanel = ({
   onCalendarDateChange,
 }: LogisticsFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10 mt-2 md:mt-0 flex-wrap">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 relative z-10 w-full flex-wrap">
       {/* Search Input */}
-      <div className="relative group w-full sm:w-auto flex-1 md:flex-none">
+      <div className="relative group w-full sm:w-auto sm:flex-1 sm:max-w-[260px]">
         <Search
           className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors group-focus-within:text-[#155DFC]"
           style={{ color: "var(--text-secondary)" }}
@@ -51,7 +51,7 @@ export const LogisticsFiltersPanel = ({
           placeholder="Buscar factura o cliente..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 pr-4 py-2.5 w-full sm:w-[260px] border rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
+          className="pl-10 pr-4 py-2.5 w-full border rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
           style={{
             backgroundColor: "var(--bg-input)",
             borderColor: "var(--border-color)",
@@ -60,30 +60,22 @@ export const LogisticsFiltersPanel = ({
         />
       </div>
 
-      <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
-        {/* Sort Filter - Custom Select */}
-        <div className="flex-1 sm:flex-none min-w-[150px]">
-          <CustomSelect
-            id="sort-select"
-            value={sortBy}
-            onChange={(v) => onSortChange(v as SortOrder)}
-            options={SORT_OPTIONS}
-            icon={<ArrowUpDown className="w-4 h-4" />}
-          />
-        </div>
-
-        {/* Date Range - Custom Select */}
-        <div className="flex-1 sm:flex-none min-w-[160px]">
-          <CustomSelect
-            id="date-range-select"
-            value={dateRange}
-            onChange={(v) => onDateChange(v as DateRange)}
-            options={DATE_RANGE_OPTIONS}
-          />
-        </div>
-
-        {/* Mini Calendar - Date Picker */}
-        <div className="flex-1 sm:flex-none min-w-[180px]">
+      {/* Selects — 2 cols on mobile, inline on sm+ */}
+      <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
+        <CustomSelect
+          id="sort-select"
+          value={sortBy}
+          onChange={(v) => onSortChange(v as SortOrder)}
+          options={SORT_OPTIONS}
+          icon={<ArrowUpDown className="w-4 h-4" />}
+        />
+        <CustomSelect
+          id="date-range-select"
+          value={dateRange}
+          onChange={(v) => onDateChange(v as DateRange)}
+          options={DATE_RANGE_OPTIONS}
+        />
+        <div className="col-span-2 sm:col-span-1">
           <MiniCalendar
             id="calendar-picker"
             selectedDate={selectedDate}

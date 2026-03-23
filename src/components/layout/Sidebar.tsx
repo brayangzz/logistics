@@ -14,6 +14,7 @@ import {
   Sun,
   Moon,
   ClipboardCheck,
+  Gauge,
 } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useAuth } from "@/lib/AuthContext";
@@ -34,6 +35,13 @@ const NAV_ITEMS = [
     roles: ["logistica"],
   },
   {
+    path: "/unidades",
+    label: "Unidades",
+    icon: Gauge,
+    matchPrefix: "/unidades",
+    roles: ["logistica"],
+  },
+  {
     path: "/chofer",
     label: "Mis entregas",
     icon: Truck,
@@ -48,22 +56,47 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Botón Hamburguesa Móvil */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-[40] w-12 h-12 rounded-xl border flex items-center justify-center shadow-lg transition-all group active:scale-95"
+      {/* ── Topbar móvil ── */}
+      <div
+        className="lg:hidden fixed top-0 left-0 right-0 z-[40] flex items-center justify-between px-4 h-14 border-b"
         style={{
-          backgroundColor: "var(--bg-sidebar)",
+          backgroundColor: "var(--bg-primary)",
           borderColor: "var(--border-color)",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+          boxShadow: "0 1px 0 var(--border-color)",
         }}
       >
-        <Menu
-          className="w-6 h-6 transition-colors group-hover:text-[#155DFC]"
-          style={{ color: "var(--text-secondary)" }}
-        />
-      </button>
+        {/* Botón hamburguesa */}
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-95 border"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            borderColor: "var(--border-color)",
+            color: "var(--text-primary)",
+          }}
+        >
+          <Menu className="w-[18px] h-[18px]" />
+        </button>
 
+        {/* Logo derecha */}
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_10px_rgba(21,93,252,0.3)] flex items-center justify-center shrink-0">
+            <PackageSearch className="w-[14px] h-[14px] text-white" />
+          </div>
+          <span
+            className="font-black text-sm tracking-widest uppercase"
+            style={{
+              background: "linear-gradient(to right, var(--text-primary), var(--text-secondary))",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            COMPERS
+          </span>
+        </div>
+      </div>
+
+      {/* ── Drawer móvil ── */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -96,7 +129,7 @@ export const Sidebar = () => {
         )}
       </AnimatePresence>
 
-      {/* Desktop Sidebar */}
+      {/* ── Desktop Sidebar ── */}
       <aside
         className="hidden lg:flex relative w-[280px] h-screen border-r flex-col overflow-hidden z-[60]"
         style={{
@@ -142,7 +175,7 @@ const SidebarContent = ({
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_15px_rgba(21,93,252,0.35)] flex items-center justify-center shrink-0">
-            <PackageSearch className="w-4.5 h-4.5 text-white w-[18px] h-[18px]" />
+            <PackageSearch className="w-[18px] h-[18px] text-white" />
           </div>
           <span
             className="font-black text-base tracking-widest uppercase"
@@ -187,7 +220,6 @@ const SidebarContent = ({
                   color: isActive ? "#FFFFFF" : "var(--text-muted)",
                 }}
               >
-                {/* Active pill */}
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active-pill"

@@ -88,66 +88,75 @@ export default function ChoferPage() {
       className="w-full min-h-screen p-4 md:p-6 lg:p-8"
       style={{ backgroundColor: "var(--bg-primary)", color: "var(--text-primary)" }}
     >
-      {/* ── Header + Search (mismo card) ── */}
+      {/* ── Page Header ── */}
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3.5">
+          <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-b from-[#155DFC] to-blue-700 shadow-[0_0_20px_rgba(21,93,252,0.3)] shrink-0">
+            <Truck className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1
+              className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight"
+              style={{ color: "var(--text-primary)", fontSize: "clamp(1.5rem, 2.5vw, 1.875rem)" }}
+            >
+              Pedidos <span style={{ color: "#155DFC", fontSize: "inherit" }}>Asignados</span>
+            </h1>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {syncedRoute.driverName} · {syncedRoute.date}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Search + Pills card ── */}
       <div
-        className="flex flex-col gap-4 mb-7 p-5 md:p-6 rounded-2xl border"
+        className="flex flex-col gap-3 mb-7 p-4 md:p-5 rounded-2xl border"
         style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}
       >
-        {/* Top row: título izq + búsqueda der */}
-        <div className="flex items-center justify-between gap-4">
-          {/* Icon + título */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_4px_20px_rgba(21,93,252,0.28)] flex items-center justify-center shrink-0 border border-blue-400/20">
-              <Truck className="w-4.5 h-4.5 text-white" />
-            </div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", whiteSpace: "nowrap", lineHeight: 1 }}>
-              <span style={{ color: "var(--text-primary)", fontSize: 26, fontWeight: 800 }}>Pedidos </span>
-              <span style={{ color: "#155DFC", fontSize: 26, fontWeight: 800 }}>Asignados</span>
-            </h1>
-          </div>
-
-          {/* Search — fixed width, right side */}
-          <motion.div
-            animate={{
-              borderColor: searchFocused ? "#155DFC" : "rgba(255,255,255,0.25)",
-              boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.15)" : "none",
-            }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 w-64"
-            style={{ backgroundColor: "rgba(255,255,255,0.09)", border: "1.5px solid rgba(255,255,255,0.25)" }}
-          >
-            <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.7)" }} strokeWidth={2} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
-              placeholder="Buscar factura o cliente..."
-              className="flex-1 bg-transparent text-xs focus:outline-none placeholder:text-white/40"
-              style={{ color: "var(--text-primary)" }}
-            />
-            <AnimatePresence>
-              {search && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.12 }}
-                  onClick={() => setSearch("")}
-                  className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center focus:outline-none"
-                  style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
-                >
-                  <X className="w-2.5 h-2.5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
+        {/* Search */}
+        <motion.div
+          animate={{
+            boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.15)" : "none",
+          }}
+          transition={{ duration: 0.15 }}
+          className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 w-full border"
+          style={{
+            backgroundColor: "var(--bg-input)",
+            borderColor: searchFocused ? "#155DFC" : "var(--border-color)",
+            transition: "border-color 0.15s",
+          }}
+        >
+          <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} strokeWidth={2} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="Buscar factura o cliente..."
+            className="flex-1 bg-transparent text-sm focus:outline-none"
+            style={{ color: "var(--text-primary)" }}
+          />
+          <AnimatePresence>
+            {search && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.7 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.12 }}
+                onClick={() => setSearch("")}
+                className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center focus:outline-none"
+                style={{ backgroundColor: "var(--bg-tertiary)" }}
+              >
+                <X className="w-2.5 h-2.5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* Info Pills */}
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           <div
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
             style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
           >
             <User2 className="w-3.5 h-3.5 text-[#155DFC]" />
@@ -155,7 +164,7 @@ export default function ChoferPage() {
             <span style={{ color: "var(--text-primary)" }}>{syncedRoute.driverName}</span>
           </div>
           <div
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
             style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
           >
             <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
@@ -163,7 +172,7 @@ export default function ChoferPage() {
             <span style={{ color: "var(--text-primary)" }}>{syncedRoute.date}</span>
           </div>
           <div
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
             style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
           >
             <span style={{ color: "var(--text-muted)" }}>Facturas:</span>
@@ -180,7 +189,7 @@ export default function ChoferPage() {
 
         {/* Sidebar: Itinerary */}
         <div className="lg:col-span-4 xl:col-span-3">
-          <div className="sticky top-6">
+          <div className="lg:sticky lg:top-6">
             <ChoferItineraryList
               route={{ ...syncedRoute, invoices: filteredInvoices }}
               selectedInvoiceId={activeInvoice?.id ?? null}

@@ -113,19 +113,19 @@ export const LogisticsTable = ({
 
                 {/* Mobile Header: Invoice + Badge */}
                 <div className="flex md:hidden justify-between w-full items-start mb-2">
-                  <div className="flex flex-col">
-                    <div
-                      className="font-semibold text-lg tracking-tight flex items-center gap-2"
+                  <div className="flex flex-col gap-1">
+                    <span
+                      className="font-semibold text-lg tracking-tight"
                       style={{ color: "var(--text-primary)" }}
                     >
                       {order.invoiceNumber}
-                      {order.isUrgent && (
-                        <span className="text-[10px] font-bold text-red-400 bg-red-500/10 ring-1 ring-red-500/20 px-1.5 py-0.5 rounded tracking-wider uppercase flex items-center gap-1.5 w-max">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                          Urgente cliente en sucursal
-                        </span>
-                      )}
-                    </div>
+                    </span>
+                    {order.isUrgent && (
+                      <span className="text-[10px] font-bold text-red-400 bg-red-500/10 ring-1 ring-red-500/20 px-1.5 py-0.5 rounded tracking-wider uppercase flex items-center gap-1.5 w-max">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                        Cliente en sucursal
+                      </span>
+                    )}
                   </div>
                   <OverallBadge state={order.overallState} />
                 </div>
@@ -142,7 +142,7 @@ export const LogisticsTable = ({
                     {order.isUrgent ? (
                       <span className="text-[10px] font-bold text-red-400 bg-red-500/10 ring-1 ring-red-500/20 px-1.5 py-0.5 rounded tracking-wider uppercase flex items-center gap-1.5 w-max">
                         <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-                        Urgente cliente en sucursal
+                        Cliente en sucursal
                       </span>
                     ) : (
                       <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>

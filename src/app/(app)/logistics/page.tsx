@@ -84,7 +84,7 @@ export default function LogisticsPage() {
 
         {/* ── Tabs ── */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl border w-full sm:w-max"
+          className="flex items-center gap-1 p-1 rounded-xl border w-full sm:w-max overflow-x-auto"
           style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}
         >
           {TABS.map((tab) => {
@@ -94,7 +94,7 @@ export default function LogisticsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-150 flex-1 sm:flex-none justify-center sm:justify-start focus:outline-none"
+                className="relative flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-150 flex-1 sm:flex-none justify-center focus:outline-none shrink-0"
                 style={{ color: isActive ? "#FFFFFF" : "var(--text-muted)" }}
               >
                 {isActive && (
@@ -118,7 +118,7 @@ export default function LogisticsPage() {
                 <Icon className="relative z-10 w-4 h-4 shrink-0" />
                 <span className="relative z-10 whitespace-nowrap">{tab.label}</span>
                 {tab.badge && isActive && (
-                  <span className="relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/20 whitespace-nowrap">
+                  <span className="relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/20 whitespace-nowrap hidden sm:inline">
                     {tab.badge}
                   </span>
                 )}
@@ -138,23 +138,23 @@ export default function LogisticsPage() {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="space-y-4"
             >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-                <LogisticsLegend
-                  statusFilter={statusFilter}
-                  onStatusChange={setStatusFilter}
-                />
-                <div className="flex-1 flex justify-start lg:justify-end">
-                  <LogisticsFiltersPanel
-                    searchTerm={searchTerm}
-                    onSearchChange={setSearchTerm}
-                    sortBy={sortBy}
-                    onSortChange={setSortBy}
-                    dateRange={dateRange}
-                    onDateChange={setDateRange}
-                    selectedDate={selectedDate}
-                    onCalendarDateChange={setSelectedDate}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <LogisticsLegend
+                    statusFilter={statusFilter}
+                    onStatusChange={setStatusFilter}
                   />
                 </div>
+                <LogisticsFiltersPanel
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  dateRange={dateRange}
+                  onDateChange={setDateRange}
+                  selectedDate={selectedDate}
+                  onCalendarDateChange={setSelectedDate}
+                />
               </div>
               <LogisticsTable
                 orders={paginatedOrders}

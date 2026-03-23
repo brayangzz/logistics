@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(ls -la /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/)",
+      "Bash(cat -n /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/unidades/page.tsx)"
+    ]
+  }
+}

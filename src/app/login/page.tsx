@@ -413,7 +413,7 @@ export default function LoginPage() {
 
       {/* ═══════════════ RIGHT PANEL ═══════════════ */}
       <div
-        className="relative flex flex-1 flex-col items-center justify-center overflow-hidden"
+        className="relative flex flex-1 flex-col items-center justify-start lg:justify-center overflow-y-auto py-10 lg:py-0"
         style={{ background: "linear-gradient(160deg, #0C1828 0%, #08121E 50%, #060D18 100%)" }}
       >
         {/* Glows */}
@@ -430,7 +430,7 @@ export default function LoginPage() {
 
         {/* Mobile logo */}
         <motion.div
-          className="lg:hidden flex items-center gap-3 mb-10"
+          className="lg:hidden flex items-center gap-3 mb-6"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -444,8 +444,8 @@ export default function LoginPage() {
 
         {/* Form card — entrance wrapper */}
         <motion.div
-          className="relative w-full"
-          style={{ maxWidth: "520px", padding: "0 32px" }}
+          className="relative w-full px-4 sm:px-8"
+          style={{ maxWidth: "520px" }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
@@ -486,7 +486,7 @@ export default function LoginPage() {
               {showSuccess && <SuccessOverlay userName={successUser} />}
             </AnimatePresence>
 
-            <form onSubmit={handleSubmit} style={{ padding: "44px 44px 36px" }}>
+            <form onSubmit={handleSubmit} className="px-6 pt-8 pb-7 sm:px-11 sm:pt-11 sm:pb-9">
 
               {/* Header */}
               <motion.div
@@ -506,7 +506,7 @@ export default function LoginPage() {
                   Iniciar sesión
                 </motion.p>
 
-                <h1 className="font-extrabold leading-[1.1] text-white" style={{ fontSize: "36px" }}>
+                <h1 className="font-extrabold leading-[1.1] text-white text-3xl sm:text-4xl">
                   Bienvenido<br />
                   <span style={{
                     background: "linear-gradient(135deg, #FFFFFF 40%, rgba(147,197,253,0.8))",
@@ -533,7 +533,6 @@ export default function LoginPage() {
                   value={username}
                   onChange={(v) => { setUsername(v); }}
                   autoComplete="username"
-                  autoFocus
                   hasError={showError}
                 />
                 <FloatingInput
@@ -622,9 +621,8 @@ export default function LoginPage() {
             </form>
 
             {/* Bottom divider */}
-            <div style={{
+            <div className="mx-6 sm:mx-11 mb-7" style={{
               height: "1px",
-              margin: "0 44px 28px",
               background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.2) 40%, rgba(96,165,250,0.12) 60%, transparent)",
             }} />
           </div>
@@ -634,7 +632,7 @@ export default function LoginPage() {
         {/* Footer */}
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
-          className="absolute bottom-5 tracking-wide"
+          className="mt-6 lg:absolute lg:bottom-5 tracking-wide"
           style={{ fontSize: "12px", color: "rgba(148,163,184,0.28)" }}
         >
           © {new Date().getFullYear()} Compers · Todos los derechos reservados

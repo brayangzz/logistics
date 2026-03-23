@@ -125,7 +125,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastData; onDismiss: (id: number)
 /* ─── Toast container (portal-like, fixed) ── */
 const ToastContainer = ({ toasts, onDismiss }:
   { toasts: ToastData[]; onDismiss: (id: number) => void }) => (
-  <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-2 items-end pointer-events-none">
+  <div className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto z-[9999] flex flex-col gap-2 items-stretch sm:items-end pointer-events-none">
     <AnimatePresence mode="sync">
       {toasts.map(t => (
         <div key={t.id} className="pointer-events-auto">
@@ -308,10 +308,10 @@ const InvoiceCard = ({ order, onAssign, onToast, index }:
           <div className="grid gap-2" style={{ gridTemplateColumns:`repeat(${order.warehouses.length}, 1fr)` }}>
             {order.warehouses.map(w => (
               <div key={w}
-                className="flex items-center justify-center gap-1.5 py-2 rounded-xl border text-center"
+                className="flex flex-col items-center justify-center gap-1 py-2.5 px-1 rounded-xl border text-center"
                 style={{ backgroundColor:"var(--bg-tertiary)", borderColor:"var(--border-color)" }}>
-                <Warehouse className="w-3.5 h-3.5 shrink-0" style={{ color:"#155DFC" }} strokeWidth={2} />
-                <span className="text-[12px] font-bold" style={{ color:"var(--text-primary)" }}>{w}</span>
+                <Warehouse className="w-4 h-4 shrink-0" style={{ color:"#155DFC" }} strokeWidth={2} />
+                <span className="text-[11px] font-bold leading-tight" style={{ color:"var(--text-primary)" }}>{w}</span>
               </div>
             ))}
           </div>
@@ -555,7 +555,7 @@ export default function AsignarPage() {
               <MapIcon className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl font-extrabold tracking-tight leading-tight" style={{ color:"var(--text-primary)" }}>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight" style={{ color:"var(--text-primary)" }}>
                 Asignación de Rutas
               </h1>
               <p className="text-xs mt-0.5" style={{ color:"var(--text-muted)" }}>
@@ -581,83 +581,84 @@ export default function AsignarPage() {
         </div>
 
         {/* Barra de controles */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3">
 
-          {/* Switch vista */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl border shrink-0"
-            style={{ backgroundColor:"var(--bg-secondary)", borderColor:"var(--border-color)" }}>
-            {SWITCH_TABS.map(({ key, label, count }) => {
-              const isActive = viewMode === key;
-              return (
-                <button key={key} onClick={() => handleViewMode(key)}
-                  className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold focus:outline-none"
-                  style={{ color: isActive ? "#fff" : "var(--text-secondary)" }}>
-                  {isActive && (
-                    <motion.div layoutId="view-switch" className="absolute inset-0 rounded-xl"
-                      style={{ background:"linear-gradient(135deg,#155DFC,#2563EB)", boxShadow:"0 3px 10px rgba(21,93,252,0.3)" }}
-                      transition={{ type:"spring", stiffness:440, damping:34 }} />
-                  )}
-                  {!isActive && (
-                    <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity"
-                      style={{ backgroundColor:"var(--select-option-hover)" }} aria-hidden />
-                  )}
-                  <span className="relative z-10 whitespace-nowrap">{label}</span>
-                  <span className="relative z-10 text-xs px-1.5 py-0.5 rounded-lg font-bold tabular-nums"
-                    style={{
-                      backgroundColor: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-tertiary)",
-                      color: isActive ? "#fff" : "var(--text-muted)",
-                    }}>{count}</span>
-                </button>
-              );
-            })}
+          {/* Fila 1: Switch vista + filtros (en desktop en la misma línea) */}
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+
+            {/* Switch vista */}
+            <div className="flex items-center gap-1 p-1 rounded-2xl border w-full sm:w-auto"
+              style={{ backgroundColor:"var(--bg-secondary)", borderColor:"var(--border-color)" }}>
+              {SWITCH_TABS.map(({ key, label, count }) => {
+                const isActive = viewMode === key;
+                return (
+                  <button key={key} onClick={() => handleViewMode(key)}
+                    className="relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold focus:outline-none flex-1 sm:flex-none justify-center"
+                    style={{ color: isActive ? "#fff" : "var(--text-secondary)" }}>
+                    {isActive && (
+                      <motion.div layoutId="view-switch" className="absolute inset-0 rounded-xl"
+                        style={{ background:"linear-gradient(135deg,#155DFC,#2563EB)", boxShadow:"0 3px 10px rgba(21,93,252,0.3)" }}
+                        transition={{ type:"spring", stiffness:440, damping:34 }} />
+                    )}
+                    {!isActive && (
+                      <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity"
+                        style={{ backgroundColor:"var(--select-option-hover)" }} aria-hidden />
+                    )}
+                    <span className="relative z-10 whitespace-nowrap">{label}</span>
+                    <span className="relative z-10 text-xs px-1.5 py-0.5 rounded-lg font-bold tabular-nums"
+                      style={{
+                        backgroundColor: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-tertiary)",
+                        color: isActive ? "#fff" : "var(--text-muted)",
+                      }}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Separador */}
+            <div className="hidden sm:block w-px h-7 shrink-0" style={{ backgroundColor:"var(--border-color)" }} />
+
+            {/* Filtros estado — solo vista activos */}
+            <AnimatePresence mode="wait">
+              {viewMode === "activos" && (
+                <motion.div key="state-filters"
+                  initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-8 }}
+                  transition={{ duration:0.18, ease:[0.22,1,0.36,1] }}
+                  className="flex items-center gap-1 p-1 rounded-2xl border w-full sm:w-auto overflow-x-auto"
+                  style={{ backgroundColor:"var(--bg-secondary)", borderColor:"var(--border-color)" }}>
+                  {FILTERS.map(({ key, label, dot }) => {
+                    const isActive = filterState === key;
+                    return (
+                      <button key={key} onClick={() => setFilterState(key)}
+                        className="relative flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold focus:outline-none flex-1 sm:flex-none justify-center shrink-0"
+                        style={{ color: isActive ? "#fff" : "var(--text-secondary)" }}>
+                        {isActive && (
+                          <motion.div layoutId="asignar-tab" className="absolute inset-0 rounded-xl"
+                            style={{ background:"linear-gradient(135deg,#155DFC,#2563EB)", boxShadow:"0 3px 10px rgba(21,93,252,0.3)" }}
+                            transition={{ type:"spring", stiffness:440, damping:34 }} />
+                        )}
+                        {!isActive && (
+                          <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity"
+                            style={{ backgroundColor:"var(--select-option-hover)" }} aria-hidden />
+                        )}
+                        {dot && <span className="relative z-10 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : dot }} />}
+                        <span className="relative z-10 whitespace-nowrap">{label}</span>
+                        <span className="relative z-10 text-xs px-1.5 py-0.5 rounded-lg font-bold tabular-nums"
+                          style={{
+                            backgroundColor: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-tertiary)",
+                            color: isActive ? "#fff" : "var(--text-muted)",
+                          }}>
+                          {counts[key as keyof typeof counts]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* Separador */}
-          <div className="hidden sm:block w-px h-7 shrink-0" style={{ backgroundColor:"var(--border-color)" }} />
-
-          {/* Filtros estado — solo vista activos */}
-          <AnimatePresence mode="wait">
-            {viewMode === "activos" && (
-              <motion.div key="state-filters"
-                initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-8 }}
-                transition={{ duration:0.18, ease:[0.22,1,0.36,1] }}
-                className="flex items-center gap-1 p-1 rounded-2xl border"
-                style={{ backgroundColor:"var(--bg-secondary)", borderColor:"var(--border-color)" }}>
-                {FILTERS.map(({ key, label, dot }) => {
-                  const isActive = filterState === key;
-                  return (
-                    <button key={key} onClick={() => setFilterState(key)}
-                      className="relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold focus:outline-none"
-                      style={{ color: isActive ? "#fff" : "var(--text-secondary)" }}>
-                      {isActive && (
-                        <motion.div layoutId="asignar-tab" className="absolute inset-0 rounded-xl"
-                          style={{ background:"linear-gradient(135deg,#155DFC,#2563EB)", boxShadow:"0 3px 10px rgba(21,93,252,0.3)" }}
-                          transition={{ type:"spring", stiffness:440, damping:34 }} />
-                      )}
-                      {!isActive && (
-                        <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity"
-                          style={{ backgroundColor:"var(--select-option-hover)" }} aria-hidden />
-                      )}
-                      {dot && <span className="relative z-10 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : dot }} />}
-                      <span className="relative z-10 whitespace-nowrap">{label}</span>
-                      <span className="relative z-10 text-xs px-1.5 py-0.5 rounded-lg font-bold tabular-nums"
-                        style={{
-                          backgroundColor: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-tertiary)",
-                          color: isActive ? "#fff" : "var(--text-muted)",
-                        }}>
-                        {counts[key as keyof typeof counts]}
-                      </span>
-                    </button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Separador */}
-          <div className="hidden sm:block w-px h-7 shrink-0" style={{ backgroundColor:"var(--border-color)" }} />
-
-          {/* Search móvil */}
+          {/* Fila 2: Search (móvil ocupa fila propia, desktop ya está arriba en el header) */}
           <div className="relative sm:hidden flex items-center w-full rounded-2xl"
             style={{ boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.14)" : "none", transition:"box-shadow 0.15s ease" }}>
             <Search className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color:"var(--text-muted)" }} />
@@ -701,7 +702,7 @@ export default function AsignarPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex-1 min-w-[120px] flex flex-col gap-1.5">
+              <div className="flex-1 w-full sm:w-auto flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium" style={{ color:"var(--text-muted)" }}>Almacenes</span>
                   <span className="text-xs font-bold tabular-nums"

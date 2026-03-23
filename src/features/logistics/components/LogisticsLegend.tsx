@@ -23,7 +23,7 @@ const STATUSES: {
 export const LogisticsLegend = ({ statusFilter, onStatusChange }: LogisticsLegendProps) => {
   return (
     <div
-      className="flex flex-wrap items-center gap-1 p-1.5 rounded-xl border relative z-10 w-full md:w-max"
+      className="flex items-center gap-1 p-1.5 rounded-xl border relative z-10 w-full md:w-max overflow-x-auto"
       style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}
     >
       {STATUSES.map((status) => {
@@ -32,7 +32,7 @@ export const LogisticsLegend = ({ statusFilter, onStatusChange }: LogisticsLegen
           <button
             key={status.value}
             onClick={() => onStatusChange(status.value)}
-            className="relative flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 flex-1 md:flex-none justify-center md:justify-start focus:outline-none"
+            className="relative flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold text-sm transition-colors duration-150 flex-1 md:flex-none justify-center md:justify-start focus:outline-none shrink-0"
             style={{ color: isActive ? "var(--text-primary)" : "var(--text-muted)" }}
           >
             {/* Animated active background */}

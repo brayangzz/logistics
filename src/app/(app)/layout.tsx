@@ -10,6 +10,7 @@ const ROLE_GUARD: Record<string, string[]> = {
   "/chofer":    ["chofer"],
   "/logistics": ["logistica"],
   "/asignar":   ["logistica"],
+  "/unidades":  ["logistica"],
 };
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -45,7 +46,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       <Sidebar />
-      <main className="flex-1 overflow-y-auto relative z-0 scroll-smooth">
+      <main className="flex-1 overflow-y-auto relative z-0 scroll-smooth pt-14 lg:pt-0">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

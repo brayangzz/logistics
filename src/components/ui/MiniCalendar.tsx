@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ const MONTHS = [
 export const MiniCalendar = ({ selectedDate, onDateChange, id }: MiniCalendarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -33,6 +34,42 @@ export const MiniCalendar = ({ selectedDate, onDateChange, id }: MiniCalendarPro
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const calcDropdownStyle = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const calendarWidth = Math.min(300, window.innerWidth - 16);
+    const spaceRight = window.innerWidth - rect.left;
+    const spaceLeft = rect.right;
+    let left: number;
+    if (spaceRight >= calendarWidth) {
+      left = rect.left;
+    } else if (spaceLeft >= calendarWidth) {
+      left = rect.right - calendarWidth;
+    } else {
+      left = 8;
+    }
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    const spaceAbove = rect.top - 8;
+    const maxH = spaceBelow >= 320 ? spaceBelow : Math.max(spaceAbove, spaceBelow);
+    const top = spaceBelow >= 200 ? rect.bottom + 8 : rect.top - Math.min(360, spaceAbove) - 8;
+    setDropdownStyle({
+      position: "fixed",
+      top,
+      left,
+      width: calendarWidth,
+      maxHeight: maxH,
+      overflowY: "auto",
+      zIndex: 9999,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleScroll = () => calcDropdownStyle();
+    window.addEventListener("scroll", handleScroll, true);
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [isOpen, calcDropdownStyle]);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -69,7 +106,7 @@ export const MiniCalendar = ({ selectedDate, onDateChange, id }: MiniCalendarPro
       {/* Trigger Button */}
       <button
         type="button"
-        onClick={() => setIsOpen((p) => !p)}
+        onClick={() => { calcDropdownStyle(); setIsOpen((p) => !p); }}
         className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all duration-200 w-full focus:outline-none focus:ring-2 focus:ring-[#155DFC]/40"
         style={{
           backgroundColor: selectedDate ? "var(--accent-bg)" : "var(--bg-input)",
@@ -110,7 +147,7 @@ export const MiniCalendar = ({ selectedDate, onDateChange, id }: MiniCalendarPro
         )}
       </button>
 
-      {/* Calendar Dropdown — aligned to right to avoid overflow */}
+      {/* Calendar Dropdown — fixed position to avoid overflow */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -118,8 +155,9 @@ export const MiniCalendar = ({ selectedDate, onDateChange, id }: MiniCalendarPro
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full mt-2 right-0 z-[200] rounded-2xl border w-[300px] p-4"
+            className="rounded-2xl border p-4"
             style={{
+              ...dropdownStyle,
               backgroundColor: "var(--calendar-bg)",
               borderColor: "var(--border-color)",
               boxShadow: "var(--dropdown-shadow)",

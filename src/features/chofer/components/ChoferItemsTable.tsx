@@ -649,7 +649,7 @@ export const ChoferItemsTable = ({ invoice }: ChoferItemsTableProps) => {
         className="px-5 pt-4 pb-3 border-b"
         style={{ borderColor: "var(--border-color)", backgroundColor: "var(--table-header-bg)" }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl border flex items-center justify-center shrink-0"
@@ -667,7 +667,7 @@ export const ChoferItemsTable = ({ invoice }: ChoferItemsTableProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2">
             <div
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl"
               style={{ backgroundColor: "var(--bg-input)", border: "1px solid var(--border-color)" }}
@@ -681,41 +681,39 @@ export const ChoferItemsTable = ({ invoice }: ChoferItemsTableProps) => {
               </span>
             </div>
 
-            <div className="w-[106px] flex justify-end">
-              <AnimatePresence mode="wait" initial={false}>
-                {allDone ? (
-                  <motion.div
-                    key="done"
-                    initial={{ opacity: 0, scale: 0.88 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.88 }}
-                    transition={{ duration: 0.15, ease: EASE }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
-                    style={{ backgroundColor: "#16A34A" }}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-                    <span className="text-xs font-bold text-white">Verificado</span>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="count"
-                    initial={{ opacity: 0, scale: 0.88 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.88 }}
-                    transition={{ duration: 0.15, ease: EASE }}
-                    className="px-3 py-1.5 rounded-xl"
-                    style={{ backgroundColor: "var(--bg-input)", border: "1px solid var(--border-color)" }}
-                  >
-                    <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
-                      {totalVerified}
-                    </span>
-                    <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                      /{items.length} art.
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              {allDone ? (
+                <motion.div
+                  key="done"
+                  initial={{ opacity: 0, scale: 0.88 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.15, ease: EASE }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+                  style={{ backgroundColor: "#16A34A" }}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                  <span className="text-xs font-bold text-white">Verificado</span>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="count"
+                  initial={{ opacity: 0, scale: 0.88 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.88 }}
+                  transition={{ duration: 0.15, ease: EASE }}
+                  className="px-3 py-1.5 rounded-xl"
+                  style={{ backgroundColor: "var(--bg-input)", border: "1px solid var(--border-color)" }}
+                >
+                  <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
+                    {totalVerified}
+                  </span>
+                  <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                    /{items.length} art.
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
