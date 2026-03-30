@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(ls -la /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/)",
-      "Bash(cat -n /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/unidades/page.tsx)"
+      "Bash(cat -n /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/unidades/page.tsx)",
+      "Bash(npm run:*)",
+      "Bash(grep -r \"font-family\\\\|font-sans\\\\|fontFamily\\\\|Geist\\\\|Inter\\\\|Sora\\\\|DM\\\\|Jakarta\\\\|Outfit\\\\|Satoshi\\\\|Manrope\\\\|Poppins\" /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src --include=*.tsx --include=*.ts --include=*.css -l)",
+      "Bash(tail -20 /c/Users/PractiDesarrollo1/Documents/Compers/logistica/src/app/\\\\\\(app\\\\\\)/autorizar/page.tsx)"
     ]
   }
 }

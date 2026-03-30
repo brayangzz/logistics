@@ -8,13 +8,14 @@ import {
   LayoutDashboard,
   Truck,
   LogOut,
-  PackageSearch,
   Menu,
   X,
   Sun,
   Moon,
   ClipboardCheck,
   Gauge,
+  BarChart3,
+  Banknote,
 } from "lucide-react";
 import { useTheme } from "@/lib/ThemeContext";
 import { useAuth } from "@/lib/AuthContext";
@@ -48,17 +49,44 @@ const NAV_ITEMS = [
     matchPrefix: "/chofer",
     roles: ["chofer"],
   },
+  {
+    path: "/supervision",
+    label: "Panel de Supervisión",
+    icon: BarChart3,
+    matchPrefix: "/supervision",
+    roles: ["admin"],
+  },
+  {
+    path: "/autorizar",
+    label: "Autorizar Salida",
+    icon: ClipboardCheck,
+    matchPrefix: "/autorizar",
+    roles: ["logistica", "guardia"],
+  },
+  {
+    path: "/caja",
+    label: "Caja",
+    icon: Banknote,
+    matchPrefix: "/caja",
+    roles: ["caja"],
+  },
 ];
+
+const LOGO_FILTER = {
+  dark: "brightness(0) invert(1)",
+  light: "brightness(0) saturate(100%) invert(27%) sepia(95%) saturate(1700%) hue-rotate(210deg) brightness(95%)",
+};
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { isDark } = useTheme();
 
   return (
     <>
       {/* ── Topbar móvil ── */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-[40] flex items-center justify-between px-4 h-14 border-b"
+        className="md:hidden fixed top-0 left-0 right-0 z-[40] flex items-center justify-between px-4 h-14 border-b"
         style={{
           backgroundColor: "var(--bg-primary)",
           borderColor: "var(--border-color)",
@@ -79,21 +107,11 @@ export const Sidebar = () => {
         </button>
 
         {/* Logo derecha */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_10px_rgba(21,93,252,0.3)] flex items-center justify-center shrink-0">
-            <PackageSearch className="w-[14px] h-[14px] text-white" />
-          </div>
-          <span
-            className="font-black text-sm tracking-widest uppercase"
-            style={{
-              background: "linear-gradient(to right, var(--text-primary), var(--text-secondary))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            COMPERS
-          </span>
-        </div>
+        <img
+          src="/logo3.png"
+          alt="Compers"
+          style={{ height: 24, filter: isDark ? LOGO_FILTER.dark : LOGO_FILTER.light }}
+        />
       </div>
 
       {/* ── Drawer móvil ── */}
@@ -105,14 +123,14 @@ export const Sidebar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
+              className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[50]"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 w-[280px] h-screen border-r flex flex-col overflow-hidden z-[60]"
+              className="md:hidden fixed left-0 top-0 bottom-0 w-[280px] h-screen border-r flex flex-col overflow-hidden z-[60]"
               style={{
                 backgroundColor: "var(--bg-sidebar)",
                 borderColor: "var(--sidebar-border)",
@@ -131,7 +149,7 @@ export const Sidebar = () => {
 
       {/* ── Desktop Sidebar ── */}
       <aside
-        className="hidden lg:flex relative w-[280px] h-screen border-r flex-col overflow-hidden z-[60]"
+        className="hidden md:flex relative w-[240px] lg:w-[280px] h-screen border-r flex-col overflow-hidden z-[60] shrink-0"
         style={{
           backgroundColor: "var(--bg-sidebar)",
           borderColor: "var(--sidebar-border)",
@@ -173,22 +191,11 @@ const SidebarContent = ({
         className="h-[72px] flex items-center justify-between px-5 border-b shrink-0"
         style={{ borderColor: "var(--sidebar-border)" }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#155DFC] to-blue-700 shadow-[0_0_15px_rgba(21,93,252,0.35)] flex items-center justify-center shrink-0">
-            <PackageSearch className="w-[18px] h-[18px] text-white" />
-          </div>
-          <span
-            className="font-black text-base tracking-widest uppercase"
-            style={{
-              background:
-                "linear-gradient(to right, var(--text-primary), var(--text-secondary))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            COMPERS
-          </span>
-        </div>
+        <img
+          src="/logo3.png"
+          alt="Compers"
+          style={{ height: 44, filter: isDark ? LOGO_FILTER.dark : LOGO_FILTER.light }}
+        />
         {isMobile && (
           <button
             onClick={onClose}

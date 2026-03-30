@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import {
-  Eye, EyeOff, PackageSearch, ArrowRight, Loader2,
+  Eye, EyeOff, ArrowRight, Loader2,
   CheckCircle2, Truck, LayoutDashboard, Package, XCircle,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { useTheme } from "@/lib/ThemeContext";
 
 /* ──────────────────────────────────────────
    Floating label input
@@ -30,13 +31,13 @@ const FloatingInput = ({
             ? "rgba(239,68,68,0.65)"
             : focused
             ? "rgba(59,130,246,0.85)"
-            : "rgba(255,255,255,0.08)",
+            : "var(--border-color)",
           boxShadow: hasError
             ? "0 0 0 3px rgba(239,68,68,0.09)"
             : focused
-            ? "0 0 0 3px rgba(59,130,246,0.1), inset 0 1px 0 rgba(255,255,255,0.05)"
-            : "inset 0 1px 0 rgba(255,255,255,0.04)",
-          backgroundColor: focused ? "rgba(59,130,246,0.045)" : "rgba(255,255,255,0.032)",
+            ? "0 0 0 3px rgba(59,130,246,0.1)"
+            : "none",
+          backgroundColor: focused ? "rgba(59,130,246,0.045)" : "var(--bg-input)",
         }}
         transition={{ duration: 0.18 }}
         className="relative rounded-xl"
@@ -51,8 +52,8 @@ const FloatingInput = ({
               : focused
               ? "#93C5FD"
               : lifted
-              ? "rgba(203,213,225,0.85)"
-              : "rgba(148,163,184,0.7)",
+              ? "var(--text-secondary)"
+              : "var(--text-muted)",
           }}
           transition={{ type: "spring", stiffness: 500, damping: 38 }}
           className="absolute left-4 top-[20px] origin-left font-medium pointer-events-none select-none"
@@ -70,7 +71,7 @@ const FloatingInput = ({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className="w-full bg-transparent outline-none pt-[32px] pb-[12px] px-4 pr-12"
-          style={{ color: "#F0F6FF", caretColor: "#60A5FA", fontSize: "16px" }}
+          style={{ color: "var(--text-primary)", caretColor: "#60A5FA", fontSize: "16px" }}
         />
 
         {suffix && (
@@ -220,10 +221,10 @@ const SuccessOverlay = ({ userName }: { userName: string }) => (
    Left panel stat card
 ────────────────────────────────────────── */
 const FloatingCard = ({
-  icon: Icon, label, value, delay, style,
+  icon: Icon, label, value, delay, style, isDark,
 }: {
   icon: React.ElementType; label: string; value: string;
-  delay: number; style: React.CSSProperties;
+  delay: number; style: React.CSSProperties; isDark: boolean;
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 14 }}
@@ -231,10 +232,10 @@ const FloatingCard = ({
     transition={{ delay, duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
     className="absolute flex items-center gap-3 px-4 py-3 rounded-2xl select-none"
     style={{
-      background: "rgba(255,255,255,0.035)",
-      border: "1px solid rgba(255,255,255,0.07)",
+      background: isDark ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.75)",
+      border: isDark ? "1px solid rgba(255,255,255,0.07)" : "1px solid rgba(21,93,252,0.15)",
       backdropFilter: "blur(14px)",
-      boxShadow: "0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)",
+      boxShadow: isDark ? "0 8px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)" : "0 8px 28px rgba(21,93,252,0.1)",
       ...style,
     }}
   >
@@ -242,11 +243,11 @@ const FloatingCard = ({
       className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
       style={{ background: "rgba(21,93,252,0.15)", border: "1px solid rgba(21,93,252,0.18)" }}
     >
-      <Icon className="w-4 h-4 text-[#60A5FA]" />
+      <Icon className="w-4 h-4 text-[#155DFC]" />
     </div>
     <div>
-      <p className="text-[11px] font-medium leading-tight" style={{ color: "rgba(148,163,184,0.6)" }}>{label}</p>
-      <p className="text-sm font-bold text-white leading-tight mt-0.5">{value}</p>
+      <p className="text-[11px] font-medium leading-tight" style={{ color: isDark ? "rgba(148,163,184,0.6)" : "#64748B" }}>{label}</p>
+      <p className="text-sm font-bold leading-tight mt-0.5" style={{ color: isDark ? "#fff" : "#0F172A" }}>{value}</p>
     </div>
   </motion.div>
 );
@@ -256,7 +257,12 @@ const FloatingCard = ({
 ────────────────────────────────────────── */
 export default function LoginPage() {
   const { user, login } = useAuth();
+  const { isDark } = useTheme();
   const router = useRouter();
+
+  const logoFilter = isDark
+    ? "brightness(0) invert(1)"
+    : "brightness(0) saturate(100%) invert(27%) sepia(95%) saturate(1700%) hue-rotate(210deg) brightness(95%)";
   const redirected = useRef(false);
 
   const [username, setUsername] = useState("");
@@ -273,7 +279,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (user && !redirected.current) {
       redirected.current = true;
-      router.replace(user.role === "chofer" ? "/chofer" : "/logistics");
+      router.replace(
+        user.role === "chofer"  ? "/chofer"
+        : user.role === "guardia" ? "/autorizar"
+        : user.role === "admin"   ? "/supervision"
+        : user.role === "caja"    ? "/caja"
+        : "/logistics"
+      );
     }
   }, [user, router]);
 
@@ -294,11 +306,22 @@ export default function LoginPage() {
     const ok = await login(username, password);
 
     if (ok) {
-      setSuccessUser(username === "chofer" ? "Carlos Ramírez" : "Logística Admin");
+      setSuccessUser(
+        username === "chofer"  ? "Carlos Ramírez"
+        : username === "guardia" ? "Guardia Control"
+        : username === "admin"   ? "Admin General"
+        : username === "caja"    ? "Caja Admin"
+        : "Logística Admin"
+      );
       setShowSuccess(true);
-      // Navigate after animation without triggering re-render loops
       setTimeout(() => {
-        router.push(username === "chofer" ? "/chofer" : "/logistics");
+        router.push(
+          username === "chofer"  ? "/chofer"
+          : username === "guardia" ? "/autorizar"
+          : username === "admin"   ? "/supervision"
+          : username === "caja"    ? "/caja"
+          : "/logistics"
+        );
       }, 2000);
     } else {
       setSubmitting(false);
@@ -308,12 +331,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex overflow-hidden" style={{ backgroundColor: "#07111C" }}>
+    <div className="min-h-screen flex overflow-hidden" style={{ backgroundColor: isDark ? "#07111C" : "var(--bg-primary)" }}>
 
       {/* ═══════════════ LEFT PANEL ═══════════════ */}
       <div className="hidden lg:flex relative flex-1 items-center justify-center overflow-hidden">
         <div className="absolute inset-0" style={{
-          background: "linear-gradient(150deg, #07111C 0%, #0B1A30 50%, #081422 100%)",
+          background: isDark
+            ? "linear-gradient(150deg, #07111C 0%, #0B1A30 50%, #081422 100%)"
+            : "linear-gradient(150deg, #EFF6FF 0%, #DBEAFE 50%, #EFF6FF 100%)",
         }} />
 
         {/* Glow orb */}
@@ -332,19 +357,23 @@ export default function LoginPage() {
 
         {/* Dot grid */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: "radial-gradient(circle, rgba(148,163,184,0.09) 1px, transparent 1px)",
+          backgroundImage: isDark
+            ? "radial-gradient(circle, rgba(148,163,184,0.09) 1px, transparent 1px)"
+            : "radial-gradient(circle, rgba(21,93,252,0.12) 1px, transparent 1px)",
           backgroundSize: "32px 32px",
         }} />
 
         {/* Divider */}
         <div className="absolute right-0 top-0 bottom-0 w-px" style={{
-          background: "linear-gradient(to bottom, transparent 8%, rgba(59,130,246,0.25) 30%, rgba(59,130,246,0.18) 70%, transparent 92%)",
+          background: isDark
+            ? "linear-gradient(to bottom, transparent 8%, rgba(59,130,246,0.25) 30%, rgba(59,130,246,0.18) 70%, transparent 92%)"
+            : "linear-gradient(to bottom, transparent 8%, rgba(21,93,252,0.2) 30%, rgba(21,93,252,0.15) 70%, transparent 92%)",
         }} />
 
         {/* Stat cards */}
-        <FloatingCard icon={Package}         label="Órdenes hoy"      value="142 activas" delay={0.9}  style={{ top: "21%",    left: "7%"  }} />
-        <FloatingCard icon={Truck}           label="Choferes en ruta"  value="18 / 24"     delay={1.1}  style={{ bottom: "27%", right: "6%" }} />
-        <FloatingCard icon={LayoutDashboard} label="Cobertura"         value="96.4%"       delay={1.3}  style={{ bottom: "14%", left: "9%"  }} />
+        <FloatingCard icon={Package}         label="Órdenes hoy"      value="142 activas" delay={0.9}  style={{ top: "21%",    left: "7%"  }} isDark={isDark} />
+        <FloatingCard icon={Truck}           label="Choferes en ruta"  value="18 / 24"     delay={1.1}  style={{ bottom: "27%", right: "6%" }} isDark={isDark} />
+        <FloatingCard icon={LayoutDashboard} label="Cobertura"         value="96.4%"       delay={1.3}  style={{ bottom: "14%", left: "9%"  }} isDark={isDark} />
 
         {/* Brand */}
         <motion.div
@@ -354,57 +383,25 @@ export default function LoginPage() {
           variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.1 } } }}
         >
           <motion.div
-            variants={{ hidden: { opacity: 0, scale: 0.3 }, visible: { opacity: 1, scale: 1 } }}
-            transition={{ type: "spring", stiffness: 200, damping: 16 }}
-            className="mb-7 relative"
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
           >
-            <div
-              className="w-24 h-24 rounded-[28px] flex items-center justify-center relative overflow-hidden"
-              style={{
-                background: "linear-gradient(145deg, #1D6BFF, #1550D4)",
-                boxShadow: "0 0 60px rgba(21,93,252,0.45), 0 0 120px rgba(21,93,252,0.15), inset 0 1px 0 rgba(255,255,255,0.2)",
-              }}
-            >
-              <PackageSearch className="w-11 h-11 text-white relative z-10" />
-              <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 28% 28%, rgba(255,255,255,0.16), transparent 55%)" }} />
-            </div>
-            <motion.div
-              className="absolute inset-0 rounded-[28px]"
-              animate={{ scale: [1, 1.38], opacity: [0.45, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
-              style={{ border: "1.5px solid rgba(59,130,246,0.5)" }}
-            />
-            <motion.div
-              className="absolute inset-0 rounded-[28px]"
-              animate={{ scale: [1, 1.7], opacity: [0.25, 0] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 0.45 }}
-              style={{ border: "1px solid rgba(59,130,246,0.22)" }}
+            <img
+              src="/logo3.png"
+              alt="Compers"
+              style={{ width: 260, filter: isDark ? "brightness(0) invert(1)" : logoFilter }}
             />
           </motion.div>
 
-          <motion.h1
-            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-            className="font-black tracking-[0.25em] uppercase leading-none"
-            style={{
-              fontSize: "clamp(32px, 3vw, 44px)",
-              background: "linear-gradient(135deg, #FFFFFF 25%, rgba(148,163,184,0.55) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            COMPERS
-          </motion.h1>
-
           <motion.div
             variants={{ hidden: { opacity: 0, scaleX: 0 }, visible: { opacity: 1, scaleX: 1 } }}
-            className="mt-3.5 h-px w-40"
+            className="mt-5 h-px w-40"
             style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.7), transparent)" }}
           />
 
           <motion.p
             variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
             className="mt-3 tracking-[0.3em] uppercase font-semibold"
-            style={{ fontSize: "clamp(10px, 0.9vw, 12px)", color: "rgba(148,163,184,0.45)" }}
+            style={{ fontSize: "clamp(10px, 0.9vw, 12px)", color: isDark ? "rgba(148,163,184,0.45)" : "rgba(21,93,252,0.5)" }}
           >
             Sistema de Logística
           </motion.p>
@@ -414,32 +411,34 @@ export default function LoginPage() {
       {/* ═══════════════ RIGHT PANEL ═══════════════ */}
       <div
         className="relative flex flex-1 flex-col items-center justify-start lg:justify-center overflow-y-auto py-10 lg:py-0"
-        style={{ background: "linear-gradient(160deg, #0C1828 0%, #08121E 50%, #060D18 100%)" }}
+        style={{ background: isDark ? "linear-gradient(160deg, #0C1828 0%, #08121E 50%, #060D18 100%)" : "var(--bg-primary)" }}
       >
         {/* Glows */}
-        <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none" style={{
-          background: "radial-gradient(circle at top right, rgba(59,130,246,0.07), transparent 55%)",
-        }} />
-        <div className="absolute bottom-0 left-0 w-72 h-72 pointer-events-none" style={{
-          background: "radial-gradient(circle at bottom left, rgba(21,93,252,0.05), transparent 60%)",
-        }} />
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px)",
-          backgroundSize: "26px 26px",
-        }} />
+        {isDark && <>
+          <div className="absolute top-0 right-0 w-96 h-96 pointer-events-none" style={{
+            background: "radial-gradient(circle at top right, rgba(59,130,246,0.07), transparent 55%)",
+          }} />
+          <div className="absolute bottom-0 left-0 w-72 h-72 pointer-events-none" style={{
+            background: "radial-gradient(circle at bottom left, rgba(21,93,252,0.05), transparent 60%)",
+          }} />
+          <div className="absolute inset-0 pointer-events-none" style={{
+            backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px)",
+            backgroundSize: "26px 26px",
+          }} />
+        </>}
 
         {/* Mobile logo */}
         <motion.div
-          className="lg:hidden flex items-center gap-3 mb-6"
+          className="lg:hidden flex items-center mb-6"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #1A65FF, #2563EB)", boxShadow: "0 0 24px rgba(21,93,252,0.4)" }}>
-            <PackageSearch className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-black text-xl tracking-widest uppercase text-white">COMPERS</span>
+          <img
+            src="/logo3.png"
+            alt="Compers"
+            style={{ height: 30, filter: logoFilter }}
+          />
         </motion.div>
 
         {/* Form card — entrance wrapper */}
@@ -462,15 +461,21 @@ export default function LoginPage() {
             className="relative overflow-hidden"
             style={{
               borderRadius: "24px",
-              background: "linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.025) 100%)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              boxShadow: "0 40px 100px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08) inset",
+              background: isDark
+                ? "linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.025) 100%)"
+                : "var(--bg-secondary)",
+              border: isDark ? "1px solid rgba(255,255,255,0.09)" : "1px solid var(--border-color)",
+              boxShadow: isDark
+                ? "0 40px 100px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.08) inset"
+                : "0 8px 40px rgba(0,0,0,0.08)",
             }}
           >
             {/* Top shimmer line */}
             <div style={{
               height: "2px",
-              background: "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.0) 10%, rgba(59,130,246,0.7) 35%, rgba(147,197,253,0.6) 65%, rgba(59,130,246,0.0) 90%, transparent 100%)",
+              background: isDark
+                ? "linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.0) 10%, rgba(59,130,246,0.7) 35%, rgba(147,197,253,0.6) 65%, rgba(59,130,246,0.0) 90%, transparent 100%)"
+                : "linear-gradient(90deg, transparent 0%, rgba(21,93,252,0.0) 10%, rgba(21,93,252,0.5) 35%, rgba(59,130,246,0.4) 65%, rgba(21,93,252,0.0) 90%, transparent 100%)",
             }} />
 
             {/* Subtle inner highlight top-left */}
@@ -506,16 +511,12 @@ export default function LoginPage() {
                   Iniciar sesión
                 </motion.p>
 
-                <h1 className="font-extrabold leading-[1.1] text-white text-3xl sm:text-4xl">
+                <h1 className="font-extrabold leading-[1.1] text-3xl sm:text-4xl" style={{ color: "var(--text-primary)" }}>
                   Bienvenido<br />
-                  <span style={{
-                    background: "linear-gradient(135deg, #FFFFFF 40%, rgba(147,197,253,0.8))",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}>de vuelta</span>
+                  <span style={{ color: "var(--text-primary)" }}>de vuelta</span>
                 </h1>
 
-                <p className="mt-3" style={{ fontSize: "16px", color: "#94A3B8", lineHeight: 1.6 }}>
+                <p className="mt-3" style={{ fontSize: "16px", color: "var(--text-secondary)", lineHeight: 1.6 }}>
                   Ingresa tus credenciales para continuar
                 </p>
               </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, Truck, CalendarDays, User2, Search, X } from "lucide-react";
+import { Loader2, Truck, CalendarDays, User2, Search, X, CarFront } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useChoferRouteHook,
@@ -108,32 +108,72 @@ export default function ChoferPage() {
         </div>
       </div>
 
-      {/* ── Search + Pills card ── */}
-      <div
-        className="flex flex-col gap-3 mb-7 p-4 md:p-5 rounded-2xl border"
-        style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}
-      >
+      {/* ── Info Pills + Search Topbar ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-7">
+        
+        {/* Info Pills */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-sm text-xs font-semibold"
+            style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-color)" }}
+          >
+            <User2 className="w-3.5 h-3.5 text-[#155DFC]" />
+            <span style={{ color: "var(--text-muted)" }}>Chofer:</span>
+            <span style={{ color: "var(--text-primary)" }}>{syncedRoute.driverName}</span>
+          </div>
+          
+          {syncedRoute.unidad && (
+            <div
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-sm text-xs font-semibold"
+              style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-color)" }}
+            >
+              <CarFront className="w-3.5 h-3.5 text-emerald-500" />
+              <span style={{ color: "var(--text-muted)" }}>Unidad:</span>
+              <span style={{ color: "var(--text-primary)" }}>{syncedRoute.unidad}</span>
+            </div>
+          )}
+
+          <div
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-sm text-xs font-semibold"
+            style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-color)" }}
+          >
+            <CalendarDays className="w-3.5 h-3.5 text-amber-500" />
+            <span style={{ color: "var(--text-muted)" }}>Fecha:</span>
+            <span style={{ color: "var(--text-primary)" }}>{syncedRoute.date}</span>
+          </div>
+
+          <div
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-sm text-xs font-semibold"
+            style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-color)" }}
+          >
+            <span style={{ color: "var(--text-muted)" }}>Facturas:</span>
+            <span style={{ color: "var(--text-primary)" }}>{filteredInvoices.length}</span>
+            {search && (
+              <span style={{ color: "var(--text-muted)" }}>/ {syncedRoute.invoices.length}</span>
+            )}
+          </div>
+        </div>
+
         {/* Search */}
         <motion.div
           animate={{
-            boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.15)" : "none",
+            boxShadow: searchFocused ? "0 4px 12px rgba(21,93,252,0.15)" : "0 1px 2px rgba(0,0,0,0.05)",
           }}
           transition={{ duration: 0.15 }}
-          className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 w-full border"
+          className="flex items-center gap-2.5 rounded-full px-4 py-2.5 border w-full md:w-[320px] lg:w-[360px] shrink-0"
           style={{
-            backgroundColor: "var(--bg-input)",
+            backgroundColor: "var(--bg-primary)",
             borderColor: searchFocused ? "#155DFC" : "var(--border-color)",
-            transition: "border-color 0.15s",
           }}
         >
-          <Search className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} strokeWidth={2} />
+          <Search className="w-4 h-4 shrink-0 transition-colors" style={{ color: searchFocused ? "#155DFC" : "var(--text-muted)" }} strokeWidth={2.5} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             placeholder="Buscar factura o cliente..."
-            className="flex-1 bg-transparent text-sm focus:outline-none"
+            className="flex-1 min-w-0 bg-transparent text-sm focus:outline-none"
             style={{ color: "var(--text-primary)" }}
           />
           <AnimatePresence>
@@ -144,51 +184,21 @@ export default function ChoferPage() {
                 exit={{ opacity: 0, scale: 0.7 }}
                 transition={{ duration: 0.12 }}
                 onClick={() => setSearch("")}
-                className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center focus:outline-none"
+                className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center focus:outline-none"
                 style={{ backgroundColor: "var(--bg-tertiary)" }}
               >
-                <X className="w-2.5 h-2.5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
+                <X className="w-3 h-3" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
               </motion.button>
             )}
           </AnimatePresence>
         </motion.div>
-
-        {/* Info Pills */}
-        <div className="flex flex-wrap gap-2">
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
-            style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
-          >
-            <User2 className="w-3.5 h-3.5 text-[#155DFC]" />
-            <span style={{ color: "var(--text-muted)" }}>Chofer:</span>
-            <span style={{ color: "var(--text-primary)" }}>{syncedRoute.driverName}</span>
-          </div>
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
-            style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
-          >
-            <CalendarDays className="w-3.5 h-3.5 text-amber-400" />
-            <span style={{ color: "var(--text-muted)" }}>Fecha:</span>
-            <span style={{ color: "var(--text-primary)" }}>{syncedRoute.date}</span>
-          </div>
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold"
-            style={{ backgroundColor: "var(--bg-tertiary)", borderColor: "var(--border-color)" }}
-          >
-            <span style={{ color: "var(--text-muted)" }}>Facturas:</span>
-            <span style={{ color: "var(--text-primary)" }}>{filteredInvoices.length}</span>
-            {search && (
-              <span style={{ color: "var(--text-muted)" }}>/ {syncedRoute.invoices.length}</span>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-7">
+      {/* ── Main Layout ── */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
 
         {/* Sidebar: Itinerary */}
-        <div className="lg:col-span-4 xl:col-span-3">
+        <div className="w-full lg:w-[280px] xl:w-[320px] shrink-0">
           <div className="lg:sticky lg:top-6">
             <ChoferItineraryList
               route={{ ...syncedRoute, invoices: filteredInvoices }}
@@ -199,7 +209,7 @@ export default function ChoferPage() {
         </div>
 
         {/* Main: Invoice Detail */}
-        <div className="lg:col-span-8 xl:col-span-9 space-y-5 pb-10">
+        <div className="flex-1 min-w-0 space-y-5 pb-10 w-full">
           {activeInvoice ? (
             <div key={activeInvoice.id} className="flex flex-col gap-5">
               <ChoferClientInfoCard invoice={activeInvoice} />

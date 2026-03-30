@@ -16,7 +16,7 @@ type Tab = "activos" | "anticipados";
 
 export default function LogisticsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("activos");
-  const { orders: initialOrders } = useOrders();
+  const { orders: initialOrders, anticipatedOrders } = useOrders();
   const isLoading = false;
   const {
     searchTerm,
@@ -45,13 +45,13 @@ export default function LogisticsPage() {
       id: "activos" as Tab,
       label: "Pedidos Normales",
       icon: Package,
-      badge: pendingCount > 0 ? `${pendingCount} pendientes` : null,
+      badge: pendingCount > 0 ? `${pendingCount}` : null,
     },
     {
       id: "anticipados" as Tab,
       label: "Anticipados",
       icon: ClipboardList,
-      badge: null,
+      badge: anticipatedOrders.length > 0 ? `${anticipatedOrders.length}` : null,
     },
   ];
 
@@ -117,8 +117,14 @@ export default function LogisticsPage() {
                 )}
                 <Icon className="relative z-10 w-4 h-4 shrink-0" />
                 <span className="relative z-10 whitespace-nowrap">{tab.label}</span>
-                {tab.badge && isActive && (
-                  <span className="relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/20 whitespace-nowrap hidden sm:inline">
+                {tab.badge && (
+                  <span
+                    className="relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap hidden sm:inline"
+                    style={{
+                      backgroundColor: isActive ? "rgba(255,255,255,0.2)" : "var(--border-color)",
+                      color: isActive ? "#fff" : "var(--text-secondary)",
+                    }}
+                  >
                     {tab.badge}
                   </span>
                 )}
@@ -138,13 +144,11 @@ export default function LogisticsPage() {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="space-y-4"
             >
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <LogisticsLegend
-                    statusFilter={statusFilter}
-                    onStatusChange={setStatusFilter}
-                  />
-                </div>
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <LogisticsLegend
+                  statusFilter={statusFilter}
+                  onStatusChange={setStatusFilter}
+                />
                 <LogisticsFiltersPanel
                   searchTerm={searchTerm}
                   onSearchChange={setSearchTerm}

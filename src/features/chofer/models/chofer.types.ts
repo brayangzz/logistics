@@ -34,6 +34,7 @@ export interface InvoiceDetail {
 export interface ChoferRoute {
   id: string;
   driverName: string;
+  unidad?: string;
   totalPendingInvoices: number;
   date: string;
   invoices: InvoiceDetail[];

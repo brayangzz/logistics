@@ -22,6 +22,189 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Fechas:** `date-fns`
 - **Clases CSS:** usar `cn()` de `src/lib/utils.ts` (clsx + tailwind-merge)
 
+---
+
+## Metodología de Trabajo Modular
+
+**El proyecto sigue una arquitectura de orquestador + subcomponentes + hooks.** Cada `page.tsx` o componente principal es un orquestador ligero que delega lógica a hooks y delega JSX a subcomponentes.
+
+### Regla de Tamaño
+- **Límite duro: 400 líneas por archivo.** Si un archivo lo supera, dividirlo es prioridad antes de seguir trabajando en él.
+- **Objetivo real:** pages ~75–200 L · componentes ~100–250 L · hooks ~40–80 L
+
+### Patrón de Trabajo por Componente
+Cuando se añade o modifica una funcionalidad:
+
+1. **Identificar el componente responsable** — no hacer cambios dispersos en múltiples archivos de golpe.
+2. **El estado va al hook, el JSX va al componente.** Si la lógica es reutilizable → `hooks/`. Si solo la usa un componente → puede quedar local en ese archivo.
+3. **Los tipos van en `*.types.ts`** dentro de la carpeta del feature o ruta que los usa. No definir tipos inline en el componente si se comparten entre 2+ archivos.
+4. **Datos mock y constantes grandes** van en `src/data/` o en el archivo de tipos del feature — nunca incrustados en el componente si ocupan más de 20 líneas.
+5. **No crear helpers genéricos** para un solo uso. Tres líneas similares son mejores que una abstracción prematura.
+
+### Cómo añadir algo nuevo a una página existente
+```
+1. Leer SOLO el hook de esa página (hooks/use*.ts) — ahí está el estado
+2. Leer SOLO el componente relevante (components/*.tsx) — ahí está el JSX
+3. Editar quirúrgicamente esos 2 archivos, no el page.tsx si no es necesario
+4. Si el cambio añade >80 líneas al componente → extraer nuevo subcomponente
+```
+
+### Cómo crear una nueva página
+```
+src/app/(app)/nueva-ruta/
+├── page.tsx                  # Orquestador: <100 líneas, solo imports + render
+├── nueva-ruta.types.ts       # Interfaces y tipos compartidos
+├── components/
+│   ├── NombreCard.tsx        # Un componente visual por responsabilidad
+│   └── NombreTable.tsx
+└── hooks/
+    └── useNombreState.ts     # Todo el useState/useMemo/useEffect
+```
+
+---
+
+## Mapa de Archivos del Proyecto
+
+> Usar este mapa antes de buscar con grep. Evita lecturas innecesarias.
+
+### `src/lib/` — Contextos y utilidades globales
+| Archivo | Qué contiene |
+|---|---|
+| `AuthContext.tsx` | Auth state, 4 usuarios hardcodeados, `useAuth()` hook |
+| `ThemeContext.tsx` | Dark/light mode, persiste en localStorage |
+| `OrdersContext.tsx` | Estado global de órdenes + `useOrders()` + `isReadyForRoute()` + tipos `Order`, `AnticipatedOrder`, `AnticipatedState` |
+| `utils.ts` | `cn()` (clsx + tailwind-merge) |
+
+### `src/components/` — Componentes UI reutilizables
+| Archivo | Qué contiene |
+|---|---|
+| `layout/Sidebar.tsx` | Sidebar principal, `NAV_ITEMS`, lógica de ruta activa, `matchPrefix` |
+| `ui/MiniCalendar.tsx` | Date picker reutilizable. Props: `{ id, selectedDate, onDateChange }` |
+
+### `src/data/` — Mock data y constantes grandes
+Datos de prueba compartidos entre rutas (MOCK_ORDERS, bloques, choferes, etc.).
+
+### `src/app/(app)/` — Rutas protegidas
+
+#### `layout.tsx`
+Auth guard + guards de rol via `useEffect`. Redirige según `user.role`.
+
+#### `logistics/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Tabla principal de pedidos logística. Usa `LogisticsFiltersPanel` + `LogisticsTable` + `AsignarOrdenesTable` |
+| `anticipados/page.tsx` | Tabla de pedidos anticipados. Usa `AnticipatedOrdersTable` |
+
+#### `asignar/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Orquestador (~160 L). Usa `useOrderFiltering` + `useToastManager` |
+| `asignar.types.ts` | `AssignState`, `SortKey`, `ViewMode`, `FilterState`, `Driver`, `Block`, `InvoiceOrder`, `ToastData` |
+| `components/OrderAssignmentCard.tsx` | Card completa de orden con dropdown selector de chofer + `DriverOption` |
+| `components/SuccessToast.tsx` | `Toast` + `ToastContainer` con auto-dismiss 3200ms |
+| `hooks/useOrderFiltering.ts` | `search`, `filterState`, `viewMode`, `filtered`, `counts`, `handleAssign` |
+| `hooks/useToastManager.ts` | `toasts[]`, `toastCounter` ref, `handleToast`, `dismissToast` |
+
+#### `autorizar/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Orquestador (~130 L). Grilla de choferes + `ScanModal` |
+| `components/ScanModal.tsx` | Modal completo: header, tabs, lista facturas, botón autorizar |
+| `components/AuthDriverCard.tsx` | Card individual de chofer con badge de autorización |
+| `hooks/useScanModal.ts` | `scannedCodes`, `currentCode`, `inputMode`, `scanResult`, `error`, `confirming`, `inputRef` |
+| `hooks/useAuthorizationManager.ts` | `authorizedDrivers` Set, `handleOpenScan`, `handleScanComplete` |
+
+#### `caja/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Orquestador (~55 L). Usa `useCaja()` + 3 paneles |
+| `components/CajaChoferPanel.tsx` | Sidebar: filtro pendiente/entregado + lista de choferes |
+| `components/CajaPedidosTable.tsx` | Info card del chofer seleccionado + tabla de pedidos + cancelación |
+| `components/CajaSummaryActions.tsx` | Total + botón Marcar Entregado + flujo de revert |
+
+Hook central en `src/features/caja/hooks/useCaja.ts` — **NO** en `src/app/(app)/caja/`.
+
+#### `chofer/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Dashboard del chofer. Usa `ChoferClientInfoCard` + `ChoferItemsTable` |
+
+#### `supervision/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Orquestador (~75 L). Usa `useOrdersFilterPaginate` + 3 componentes |
+| `supervision.types.ts` | `OrderStatus`, `DriverStatus`, `FilterStatus`, `Order`, `Driver`, `DriverSummary` |
+| `components/OrderStatusStats.tsx` | 4 stat cards animadas (total, pendiente, enRuta, entregado) |
+| `components/DriversHorizontalList.tsx` | Carrusel horizontal de cards de choferes con scroll indicator |
+| `components/OrdersTable.tsx` | Tabla paginada + toolbar (search, status dropdown, MiniCalendar) |
+| `components/PaginationControls.tsx` | Controles reutilizables. Retorna `null` si `totalPages <= 1` |
+| `hooks/useOrdersFilterPaginate.ts` | `search`, `filterStatus`, `selectedDate`, `page`, `stats`, `driversSummary`, `filtered`, `paginated`. Exporta `PAGE_SIZE = 8` |
+
+#### `supervision/choferes/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Historial de chofer. Recibe `?chofer=XX` via `useSearchParams` |
+| `components/DriverHistoryHeader.tsx` | Botón atrás + avatar + nombre + stats rápidas |
+| `components/DeliveryStatusCards.tsx` | 3 stat cards (Entregados/En Ruta/Pendientes) |
+| `components/HourlyActivityChart.tsx` | Gráfico de barras recharts por hora (8h–18h) |
+| `components/ZoneDistributionPanel.tsx` | Top 5 zonas con barras animadas |
+| `components/DeliveriesTable.tsx` | Tabla paginada de entregas + toolbar de filtros |
+| `components/DeliveryDetailModal.tsx` | Modal de detalle por entrega con lista de items |
+
+#### `unidades/`
+| Archivo | Qué contiene |
+|---|---|
+| `page.tsx` | Orquestador (~140 L). `INITIAL_UNITS`, `FILTERS`, grilla de `UnitCard` |
+| `unidades.types.ts` | `UnitStatus`, `StatusFilter`, `Driver`, `Unit` |
+| `components/UnitCard.tsx` | Card con dropdown chofer + barra gas + toggle mantenimiento |
+| `components/GasBar.tsx` | Barra combustible animada. Props: `{ value: number }` |
+| `components/DriverSelectOption.tsx` | Opción dropdown. Exporta `AVATAR` y `av()` para uso en `UnitCard` |
+| `hooks/useUnitCard.ts` | `pendingId`, `open`, `editMode`, `localMaint`, `ref`, `handleSave`, `handleEditSave`, `handleEditCancel` |
+
+### `src/features/chofer/` — Feature del chofer
+| Archivo | Qué contiene |
+|---|---|
+| `components/ChoferClientInfoCard.tsx` | Card info del cliente activo |
+| `components/ChoferItemsTable.tsx` | Orquestador (~180 L). Lista `WarehouseCard` por almacén |
+| `components/warehouse/AluminioMap.tsx` | SVG memoizado del almacén aluminio |
+| `components/warehouse/VidrioMap.tsx` | SVG del almacén vidrio |
+| `components/warehouse/LocationModal.tsx` | Portal modal con mapa + secciones activas |
+| `components/items/ItemRow.tsx` | Fila checkbox con peso + badges |
+| `components/items/WarehouseCard.tsx` | Card por almacén con save + mapa |
+| `components/modals/ReportMissingModal.tsx` | Modal de reporte de faltantes |
+| `hooks/useVerificationState.ts` | `savedVerified`, `reportedItems`, sessionStorage, `handleCommit` |
+| `models/chofer.types.ts` | Tipos del feature chofer |
+| `services/chofer.api.ts` | Llamadas API del chofer |
+
+### `src/features/logistics/` — Feature de logística
+| Archivo | Qué contiene |
+|---|---|
+| `components/AsignarOrdenesTable.tsx` | Orquestador (~200 L). Usa `useAssignmentFiltering` + `BlockSelector` + `AssignmentSummaryCards` |
+| `components/AnticipatedOrdersTable.tsx` | Orquestador (~200 L). Usa `useAnticipatedFiltering` + `AnticipatedFilterRow` |
+| `components/LogisticsTable.tsx` | Tabla principal de pedidos de logística |
+| `components/LogisticsFiltersPanel.tsx` | Panel de filtros de logística |
+| `components/LogisticsLegend.tsx` | Leyenda de estados |
+| `components/StateIndicator.tsx` | Semáforo de estado visual |
+| `components/OverallBadge.tsx` | Badge de estado general |
+| `components/asignar/asignar.types.ts` | `AssignState`, `FilterState`, `Driver`, `Block`, `LocalAssignment` |
+| `components/asignar/BlockSelector.tsx` | Dropdown 2-pasos bloque→chofer. **Exporta `BLOCKS`** (datos de 4 bloques) |
+| `components/asignar/AssignmentSummaryCards.tsx` | 3 stat cards: Listos/Asignados/Pendientes |
+| `components/anticipated/AnticipatedFilterRow.tsx` | Pills de filtro + search + MiniCalendar |
+| `hooks/useLogisticsQuery.ts` | Query de órdenes logística |
+| `hooks/useLogisticsPageState.ts` | Estado de la página de logística |
+| `hooks/useAssignmentFiltering.ts` | `assignments`, `stateFilter`, `blockFilter`, `filtered`, `pendingCount`, `assignedCount`, `enRutaCount` |
+| `hooks/useAnticipatedFiltering.ts` | `search`, `bucket`, `selectedDate`, `currentPage`, `filtered`, `paginated`, `totalPages`. Exporta `FilterBucket` type |
+| `models/logistics.types.ts` | Tipos del feature logística |
+| `models/filters.types.ts` | Tipos de filtros |
+| `services/logistics.api.ts` | Llamadas API logística |
+
+### `src/features/caja/`
+| Archivo | Qué contiene |
+|---|---|
+| `hooks/useCaja.ts` | Hook central de caja. Interfaces `Chofer`, `Pedido`. Maneja `selectedId`, `choferes`, `pedidos`, `cancelarPedido`, `marcarEntregado`, `revertirEntregado` |
+
+---
+
 ## Arquitectura
 
 ### Routing
@@ -31,110 +214,221 @@ El App Router agrupa las rutas protegidas bajo `src/app/(app)/`:
 - `/(app)/logistics/*` — área logística (rol: `"logistica"`)
 - `/(app)/asignar` — asignación de rutas (rol: `"logistica"`)
 - `/(app)/chofer` — dashboard del chofer (rol: `"chofer"`)
+- `/(app)/autorizar` — autorización de salida (roles: `"logistica"`, `"guardia"`)
+- `/(app)/supervision` — panel de supervisión (rol: `"admin"`)
+- `/(app)/supervision/choferes` — historial por chofer, recibe `?chofer=XX` via `useSearchParams`
+- `/(app)/caja` — gestión de caja (rol: `"logistica"`)
+- `/(app)/unidades` — control de unidades (rol: `"logistica"`)
+
+### Navegación con Parámetros
+```tsx
+router.push(`/supervision/choferes?chofer=${initials}`)
+const choferParam = useSearchParams().get("chofer")
+```
 
 ### Autenticación
-`src/lib/AuthContext.tsx` — contexto cliente con dos usuarios hardcodeados (`logistica/123`, `chofer/123`). El estado se persiste en `localStorage`. **Importante:** el estado inicial es siempre `null` y se carga en `useEffect` para evitar hydration mismatch SSR/cliente.
+`src/lib/AuthContext.tsx` — contexto cliente con 4 usuarios hardcodeados. El estado inicial es siempre `null` (carga en `useEffect` para evitar hydration mismatch).
 
-### Contextos Globales (src/lib/)
-- `AuthContext` — usuario y rol activo
-- `ThemeContext` — dark/light mode, persiste en localStorage
-- `OrdersContext` — estado global de órdenes/pedidos
+| Usuario | Rol | Redirige a |
+|---|---|---|
+| `logistica/123` | `"logistica"` | `/logistics` |
+| `chofer/123` | `"chofer"` | `/chofer` |
+| `guardia/123` | `"guardia"` | `/autorizar` |
+| `admin/123` | `"admin"` | `/supervision` |
 
-### Estructura de Features (src/features/)
-Cada feature (`chofer/`, `logistics/`) sigue la misma estructura interna: `components/`, `hooks/`, `models/`, `services/`.
+La cadena de redirección se implementa en **4 lugares**: `layout.tsx`, `login/page.tsx` (useEffect ya-autenticado), `login/page.tsx` (setTimeout post-login) y `app/page.tsx`.
 
 ### Variables CSS de Tema
-El tema usa CSS custom properties definidas en `globals.css`. Usar siempre estas variables en lugar de colores hardcodeados cuando aplique:
+Definidas en `globals.css`. Usar siempre estas variables:
 - `--bg-primary`, `--bg-secondary`, `--bg-tertiary`
 - `--text-primary`, `--text-secondary`, `--text-muted`
-- `--border-color`
-- `--radial-bg`
+- `--border-color`, `--border-hover`
+- `--accent`, `--accent-bg`, `--accent-border`
+- `--table-header-bg`, `--table-row-bg`, `--table-row-hover`
+- `--dropdown-bg`, `--dropdown-shadow`
+- `--footer-bg`, `--bg-input`
+- `--select-option-hover`
 
 ### Colores de Acento
-Preferir colores sólidos, no transparentes/tenues:
+**PROHIBIDO:** `linear-gradient` con colores semi-transparentes como fondo de cards. Siempre fondos sólidos `var(--bg-*)`.
+
 - Azul: `#155DFC` (principal, interactivo)
-- Verde: `#10B981` (disponible, confirmación)
-- Ámbar: `#F59E0B` (advertencia, advertencia)
+- Verde: `#10B981` (éxito, disponible)
+- Ámbar: `#F59E0B` (advertencia, mantenimiento)
 - Violeta: `#8B5CF6` (acento secundario)
 
 ### Colores de Avatares
-Usar colores vibrantes y contrastantes en fondos oscuros:
 ```tsx
 const AVATAR_COLORS = {
-  CR: "#6366F1",  // Indigo
-  MT: "#10B981",  // Verde
-  JH: "#8B5CF6",  // Violeta
-  RD: "#F59E0B",  // Ámbar
-  AV: "#155DFC",  // Azul principal
-  default: "#64748B"  // Gris slate
+  CR: "#6366F1",  MS: "#10B981",  EV: "#155DFC",
+  JH: "#8B5CF6",  RD: "#F59E0B",  MT: "#0EA5E9",
+  default: "#64748B"
 };
 ```
-**Importante:** Siempre usar fondo sólido + texto blanco. Nunca usar colores con opacidad o semi-transparentes en avatares.
+Siempre fondo sólido + texto blanco. Nunca opacidad en avatares.
 
 ### Dropdowns y z-index
-Los dropdowns deben usar `position: absolute` con `z-index` alto (ej. `z-[500]`) y el contenedor padre debe tener `overflow: visible` para que no se recorten.
+`position: absolute`, `z-[500]`, contenedor padre con `overflow: visible`.
 
-### Animaciones de Layout
-- **Cards con contenido variable (ej. formularios):** Usar `layout` en la card raíz + `layout="position"` en contenedores internos. Esto permite que framer-motion interpole cambios de altura automáticamente con spring suave.
-- **Elementos que aparecen/desaparecen:** Envolver en `AnimatePresence` con `height: 0 → "auto"` en lugar de `opacity` solo. Usar `duration: 0.25-0.3` con easing `[0.25, 0.46, 0.45, 0.94]`.
-- **Grillas con cards animadas:** Envolver con `LayoutGroup` para aislar animaciones por card. Usar `AnimatePresence mode="popLayout"` para exit suave.
+---
 
-### Microanimaciones
-- **Botones:** `whileHover={{ scale: 1.01-1.02 }}` + `whileTap={{ scale: 0.94-0.97 }}` para feedback tacto.
-- **Toggles/switches:** Spring con `stiffness: 400-500, damping: 28-30` para movimiento del track.
-- **Valores animados (números, colores):** Usar `motion.span` o `motion.div` con `animate={{ color }}` + `transition={{ duration: 0.35 }}` para cambios suaves sin saltos.
+## 🛡️ Protocolo de Ahorro de Tokens (Anti-Overread)
 
-### Reglas de Vibe Coding (Token Saving)
-- **Ediciones Quirúrgicas:** Solo modifica las líneas de código necesarias. No reescribas el archivo completo a menos que sea un refactor total.
-- **Sin Prosa:** No expliques los cambios ni saludes. Si la edición es exitosa, solo muestra el resultado o un "Hecho".
-- **Preferencia de Estilos:** Usa siempre las variables de `globals.css` definidas arriba. No inventes colores hardcodeados.
-- **Contexto Mínimo:** No leas archivos de la carpeta `node_modules` ni archivos de configuración a menos que te lo pida explícitamente.
+- **Prohibido el Full-Read** en archivos >400 líneas. Usa `grep` primero para localizar, luego lee solo el rango necesario.
+- **Usar el Mapa de Archivos** arriba antes de buscar con grep. Si el archivo está mapeado, ya sabes qué contiene.
+- **Planificación por Líneas:** Antes de editar, identifica el rango exacto de líneas a modificar.
+- **Salida Minimalista:** Solo el bloque afectado. No reescribir el archivo si el cambio es <15% del contenido.
+- **Modularización Preventiva:** Archivo >400 L → proponer y ejecutar división antes de seguir.
+- **Memoria de Turno:** No releer un archivo ya leído en el turno actual salvo cambio externo confirmado.
+- **Sin Prosa:** Solo código. "Hecho" si la edición fue exitosa.
 
-### Contraste y Legibilidad
-- **Texto sobre fondo oscuro:** Usar `--text-primary` (muy claro) para contenido principal. `--text-secondary` (gris claro) solo para labels/metadata. **Nunca** `--text-muted` para contenido interactivo.
-- **Barra de combustible/progreso:** Animar el color junto con el ancho. Colores por rango: verde (>55%), ámbar (>25%), rojo (<25%).
-- **Badges/estados:** Fondo sólido + texto blanco para máximo contraste. Ejemplo: `backgroundColor: "#10B981"`, `color: "#fff"`.
+---
 
-### Patrones Comunes
+## Animaciones
 
-**Componentes Visuales (read-only):**
-Cuando un componente solo muestra datos sin edición (ej. `GasBar`), pasar solo los valores necesarios. Ejemplo:
+### Constantes
 ```tsx
-<GasBar value={unit.gasolina} />  // no onChange, no editable flag
+const SMOOTH = { type: "spring", stiffness: 260, damping: 26 }  // layout transitions
+// Botones/toggles rápidos: stiffness: 400-500, damping: 28-32
 ```
 
-**Estados Condicionales con AnimatePresence:**
-Para secciones que aparecen/desaparecen (ej. panel de mantenimiento en edit mode):
+### Patrones
 ```tsx
+// Sección que aparece/desaparece
 <AnimatePresence initial={false}>
-  {editMode && (
+  {visible && (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={{ overflow: "hidden" }}
-    >
-      {/* contenido */}
-    </motion.div>
+    />
   )}
 </AnimatePresence>
-```
 
-**Transiciones de Valor (números, colores):**
-```tsx
+// Cards con altura variable
+<motion.div layout transition={SMOOTH}>          // raíz
+  <motion.div layout="position" transition={SMOOTH}>  // interior
+
+// Grilla con exit animado
+<LayoutGroup>
+  <AnimatePresence mode="popLayout">
+    {items.map(item => <Card key={item.id} />)}
+  </AnimatePresence>
+</LayoutGroup>
+
+// Valor/color animado
 <motion.span animate={{ color }} transition={{ duration: 0.35 }}>
-  {value}%
-</motion.span>
+
+// Barra de progreso
+<motion.div animate={{ width: `${v}%`, backgroundColor: color }}
+  transition={{ type: "spring", stiffness: 180, damping: 22 }} />
 ```
 
-**Barras de Progreso/Combustible:**
+---
+
+## Design System
+
+### Tipografía
+| Uso | Clase |
+|---|---|
+| Título de página | `text-2xl md:text-3xl font-extrabold tracking-tight` |
+| Subtítulo | `text-xs` + `color: var(--text-secondary)` |
+| Número stat | `text-4xl font-extrabold tabular-nums` |
+| Label stat | `text-[10px] font-bold uppercase tracking-widest` |
+| Texto tabla | `text-sm font-semibold` + `color: var(--text-primary)` |
+| Metadata | `text-xs` + `color: var(--text-secondary)` |
+
+### Colores de Texto — Regla estricta
+- `var(--text-primary)` → contenido principal: nombres, valores, folios
+- `var(--text-secondary)` → metadata, labels, subtítulos
+- `var(--text-muted)` → **solo** placeholders, iconos decorativos, timestamps secundarios
+- **Prohibido:** grises hardcodeados (`#64748B`, `gray-*`) en texto visible
+- **Prohibido:** `#155DFC` en texto corrido — solo botones, badges activos, iconos interactivos
+
+### Estructura de Página Estándar
+1. **Header** — icono gradient azul `w-11 h-11 rounded-2xl` + título `font-extrabold` + subtítulo con métrica dinámica
+2. **Filtros** — fila horizontal, `py-2.5` uniforme
+3. **Stats** — grid 3–4 cards con número grande + label uppercase
+4. **Contenido** — grid `lg:grid-cols-3`, contenido `col-span-2`, sidebar 1 col
+5. **Cards/filas** — `var(--bg-secondary)` + `var(--border-color)` + `rounded-2xl`/`rounded-3xl`
+
+### Header de Página
 ```tsx
-<div className="relative h-2 rounded-full" style={{ backgroundColor: "var(--border-color)" }}>
-  <motion.div
-    className="absolute inset-y-0 left-0 rounded-full"
-    animate={{ width: `${value}%`, backgroundColor: color }}
-    transition={{ type: "spring", stiffness: 180, damping: 22 }}
-  />
+<div className="flex items-center gap-3.5">
+  <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0"
+    style={{ background: "linear-gradient(135deg,#155DFC,#2563EB)", boxShadow: "0 0 20px rgba(21,93,252,0.28)" }}>
+    <Icon className="w-5 h-5 text-white" />
+  </div>
+  <div>
+    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
+      Título
+    </h1>
+    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>métrica dinámica</p>
+  </div>
 </div>
 ```
+
+### Badges
+- **En tabla (read-only):** fondo `rgba(color, 0.12)` + borde `rgba(color, 0.35)` + texto color sólido
+- **En cards interactivos:** fondo sólido + texto blanco
+
+### Tablas
+**Nunca `divide-y` con `borderColor` inline** — produce líneas blancas en dark mode. Usar:
+```tsx
+style={{ borderBottom: isLast ? "none" : "1px solid var(--border-color)" }}
+```
+
+### Tablas Responsivas
+```tsx
+{/* Desktop */}
+<div className="hidden md:block w-full overflow-x-auto">
+  <div className="min-w-[860px]">{/* grid header + rows */}</div>
+</div>
+{/* Mobile */}
+<div className="md:hidden">
+  {items.map(item => (
+    <div className="px-4 py-3.5 flex flex-col gap-2.5"
+      style={{ borderBottom: "1px solid var(--border-color)" }}>
+    </div>
+  ))}
+</div>
+```
+
+### Botones de Acción en Tabla
+```tsx
+<motion.button
+  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}
+  transition={{ type: "spring", stiffness: 350, damping: 28 }}
+  className="p-2 rounded-xl border"
+  onMouseEnter={e => { e.currentTarget.style.color = "#155DFC"; e.currentTarget.style.borderColor = "#155DFC"; e.currentTarget.style.backgroundColor = "rgba(21,93,252,0.08)"; }}
+  onMouseLeave={e => { e.currentTarget.style.color = "var(--text-secondary)"; e.currentTarget.style.borderColor = "var(--border-color)"; e.currentTarget.style.backgroundColor = "var(--bg-tertiary)"; }}
+>
+  <Eye className="w-4 h-4" />
+</motion.button>
+```
+
+### Componente MiniCalendar
+```tsx
+<MiniCalendar
+  id="id-unico"
+  selectedDate={selectedDate}
+  onDateChange={(d) => { setSelectedDate(d); setPage(1); }}
+/>
+```
+- Posicionado con `fixed` dinámico — no necesita `z-index` en el padre.
+- Clickear el mismo día la deselecciona. Muestra X para limpiar cuando hay fecha seleccionada.
+
+### Filtro por Fecha con Strings formateados
+```tsx
+// deliveryDate = "19 Oct, 14:30" — NO usar new Date(string)
+const label = selectedDate.toLocaleDateString("es-MX", { day: "numeric", month: "short" })
+  .replace(".", "").toLowerCase();
+matchDate = o.deliveryDate.toLowerCase().startsWith(label);
+```
+
+### Sidebar NAV_ITEMS
+- Iconos inactivos: `color: "#155DFC"` — nunca gris
+- Iconos activos: `color: "#FFFFFF"`
+- Rutas padre activas en subrutas: usar `matchPrefix`

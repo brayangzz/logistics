@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClipboardList, Clock, CalendarCheck, AlertCircle, CheckCircle2, Package } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { anticipadosPageOrders } from "@/data";
 
 type AnticipatedState = "Programado" | "Confirmado" | "En Preparación" | "Cancelado";
 
@@ -18,99 +19,7 @@ interface AnticipatedOrder {
   items: { area: string; qty: number }[];
 }
 
-const MOCK_ANTICIPATED: AnticipatedOrder[] = [
-  {
-    id: "a1",
-    invoiceNumber: "#ANT-001",
-    clientName: "Cristales Monterrey",
-    clientInitials: "CM",
-    scheduledDate: "2026-03-25",
-    description: "Ventanas panorámicas serie 400 — Proyecto residencial Cumbres",
-    state: "Confirmado",
-    items: [
-      { area: "Vidrio", qty: 24 },
-      { area: "Aluminio", qty: 12 },
-      { area: "Herrajes", qty: 48 },
-    ],
-  },
-  {
-    id: "a2",
-    invoiceNumber: "#ANT-002",
-    clientName: "Aluminios del Norte",
-    clientInitials: "AN",
-    scheduledDate: "2026-03-28",
-    description: "Puertas corredizas y marcos — Edificio comercial San Pedro",
-    state: "Programado",
-    items: [
-      { area: "Aluminio", qty: 30 },
-      { area: "Herrajes", qty: 60 },
-    ],
-  },
-  {
-    id: "a3",
-    invoiceNumber: "#ANT-003",
-    clientName: "Fachadas de Vidrio MTY",
-    clientInitials: "FV",
-    scheduledDate: "2026-04-02",
-    description: "Fachada completa cristal templado 10mm — Torre corporativa Valle",
-    state: "En Preparación",
-    items: [
-      { area: "Vidrio", qty: 80 },
-      { area: "Aluminio", qty: 40 },
-    ],
-  },
-  {
-    id: "a4",
-    invoiceNumber: "#ANT-004",
-    clientName: "Herrajes y Perfiles SA",
-    clientInitials: "HP",
-    scheduledDate: "2026-04-05",
-    description: "Kit herraje premium para 200 ventanas — Fraccionamiento Cielito",
-    state: "Confirmado",
-    items: [
-      { area: "Herrajes", qty: 200 },
-      { area: "Vidrio", qty: 50 },
-    ],
-  },
-  {
-    id: "a5",
-    invoiceNumber: "#ANT-005",
-    clientName: "Metalúrgica Vidal",
-    clientInitials: "MV",
-    scheduledDate: "2026-04-10",
-    description: "Perfiles estructurales para cubierta metálica industrial",
-    state: "Programado",
-    items: [
-      { area: "Aluminio", qty: 100 },
-    ],
-  },
-  {
-    id: "a6",
-    invoiceNumber: "#ANT-006",
-    clientName: "Vidrios Regios del Noreste",
-    clientInitials: "VR",
-    scheduledDate: "2026-03-22",
-    description: "Mampara divisoria vidrio esmerilado — Oficinas Apodaca Norte",
-    state: "Cancelado",
-    items: [
-      { area: "Vidrio", qty: 15 },
-      { area: "Herrajes", qty: 30 },
-    ],
-  },
-  {
-    id: "a7",
-    invoiceNumber: "#ANT-007",
-    clientName: "Importadora Perfiles SA",
-    clientInitials: "IP",
-    scheduledDate: "2026-04-15",
-    description: "Perfiles de aluminio natural línea comercial — Gran Proyecto Escobedo",
-    state: "Programado",
-    items: [
-      { area: "Aluminio", qty: 200 },
-      { area: "Herrajes", qty: 80 },
-    ],
-  },
-];
+const MOCK_ANTICIPATED: AnticipatedOrder[] = anticipadosPageOrders as AnticipatedOrder[];
 
 const STATE_CONFIG: Record<AnticipatedState, { label: string; color: string; bg: string; ring: string; icon: React.ReactNode }> = {
   Programado: {

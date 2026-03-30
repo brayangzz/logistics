@@ -7,19 +7,24 @@ import { useAuth } from "@/lib/AuthContext";
 import type { ReactNode } from "react";
 
 const ROLE_GUARD: Record<string, string[]> = {
-  "/chofer":    ["chofer"],
-  "/logistics": ["logistica"],
-  "/asignar":   ["logistica"],
-  "/unidades":  ["logistica"],
+  "/chofer":            ["chofer"],
+  "/logistics":         ["logistica"],
+  "/asignar":           ["logistica"],
+  "/unidades":          ["logistica"],
+  "/autorizar":         ["logistica", "guardia"],
+  "/supervision":       ["admin"],
+  "/supervision/chofer":["admin"],
+  "/caja":              ["caja"],
 };
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const hasRedirected = useRef(false);
 
   useEffect(() => {
+    if (isLoading) return;
     if (hasRedirected.current) return;
 
     if (!user) {
@@ -31,13 +36,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     for (const [route, roles] of Object.entries(ROLE_GUARD)) {
       if (pathname.startsWith(route) && !roles.includes(user.role)) {
         hasRedirected.current = true;
-        router.replace(user.role === "chofer" ? "/chofer" : "/logistics");
+        router.replace(
+          user.role === "chofer"  ? "/chofer"
+          : user.role === "guardia" ? "/autorizar"
+          : user.role === "admin"   ? "/supervision"
+          : user.role === "caja"    ? "/caja"
+          : "/logistics"
+        );
         return;
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.role, pathname]);
+  }, [isLoading, user?.role, pathname]);
 
+  if (isLoading) return null;
   if (!user) return null;
 
   return (
@@ -46,7 +58,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
       <Sidebar />
-      <main className="flex-1 overflow-y-auto relative z-0 scroll-smooth pt-14 lg:pt-0">
+      <main className="flex-1 overflow-y-auto relative z-0 scroll-smooth pt-14 md:pt-0">
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

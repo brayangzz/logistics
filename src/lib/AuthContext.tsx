@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 
-export type UserRole = "logistica" | "chofer";
+export type UserRole = "logistica" | "chofer" | "guardia" | "admin" | "caja";
 
 export interface AuthUser {
   id: string;
@@ -39,6 +39,36 @@ const USERS: Record<string, { password: string; user: AuthUser }> = {
       roleLabel: "Chofer",
     },
   },
+  guardia: {
+    password: "123",
+    user: {
+      id: "3",
+      name: "Guardia Control",
+      role: "guardia",
+      initials: "GC",
+      roleLabel: "Guardia",
+    },
+  },
+  admin: {
+    password: "123",
+    user: {
+      id: "4",
+      name: "Admin General",
+      role: "admin",
+      initials: "AG",
+      roleLabel: "Administrador",
+    },
+  },
+  caja: {
+    password: "123",
+    user: {
+      id: "5",
+      name: "Caja Admin",
+      role: "caja",
+      initials: "CA",
+      roleLabel: "Caja",
+    },
+  },
 };
 
 function readStoredUser(): AuthUser | null {
@@ -55,22 +85,24 @@ interface AuthContextValue {
   user: AuthUser | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  isLoading: false;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   login: async () => false,
   logout: () => { },
-  isLoading: false,
+  isLoading: true,
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Read localStorage after hydration to avoid SSR mismatch
   useEffect(() => {
     setUser(readStoredUser());
+    setIsLoading(false);
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -89,7 +121,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading: false }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
