@@ -1,11 +1,24 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { supervisionDrivers, supervisionOrders } from "@/data";
+import { supervisionDrivers, chofereDeliveries } from "@/data";
 import { Order, Driver, FilterStatus } from "../supervision.types";
 
 const DRIVERS_LIST: Driver[] = supervisionDrivers as Driver[];
-const ORDERS: Order[]       = supervisionOrders as Order[];
+
+// Map chofereDeliveries to Order shape for a single source of truth
+const ORDERS: Order[] = chofereDeliveries.map(d => ({
+  id:           d.id,
+  folio:        d.folio,
+  client:       d.client,
+  address:      d.address,
+  driver:       DRIVERS_LIST.find(dr => dr.initials === d.driverInitials)?.name ?? d.driverInitials,
+  driverInitials: d.driverInitials,
+  deliveryDate: `${d.dateLabel}, ${d.time}`,
+  status:       d.status as Order["status"],
+  weight:       d.weight,
+  zone:         d.zone,
+}));
 
 export const PAGE_SIZE = 8;
 
@@ -28,12 +41,17 @@ export const useOrdersFilterPaginate = () => {
 
   const driversSummary = useMemo(() =>
     DRIVERS_LIST.map(d => {
-      const orders = ORDERS.filter(o => o.driver === d.name);
+      const orders   = ORDERS.filter(o => o.driver === d.name);
+      const entregado = orders.filter(o => o.status === "Entregado").length;
+      const enRuta    = orders.filter(o => o.status === "En Ruta").length;
+      const pendiente = orders.filter(o => o.status === "Pendiente").length;
+      const status = enRuta > 0 ? "En Ruta" : pendiente > 0 ? "Pendiente" : "Disponible";
       return {
         ...d,
-        total:     orders.length,
-        entregado: orders.filter(o => o.status === "Entregado").length,
-        enRuta:    orders.filter(o => o.status === "En Ruta").length,
+        status: status as import("../supervision.types").DriverStatus,
+        total:  orders.length,
+        entregado,
+        enRuta,
       };
     })
   , []);

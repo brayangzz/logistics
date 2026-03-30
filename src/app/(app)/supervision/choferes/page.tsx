@@ -86,8 +86,28 @@ export default function HistorialChoferPage() {
             style={{ backgroundColor: selectedDriver.color, color: "#fff", boxShadow: `0 0 24px ${selectedDriver.color}50` }}>
             {selectedDriver.initials}
           </motion.div>
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
             <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>{selectedDriver.name}</h1>
+            {(() => {
+              const isEnRuta   = enRutaCount > 0;
+              const isPending  = !isEnRuta && pendientesCount > 0;
+              const color      = isEnRuta ? "#155DFC" : isPending ? "#F59E0B" : "#10B981";
+              const label      = isEnRuta ? "En Ruta"  : isPending ? "Pendiente" : "Libre";
+              return (
+                <motion.div key={`status-${selectedDriver.initials}`}
+                  initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0"
+                  style={{ backgroundColor: `${color}15`, border: `1px solid ${color}35` }}>
+                  <motion.div
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: color }} />
+                  <span className="text-xs font-bold" style={{ color }}>{label}</span>
+                </motion.div>
+              );
+            })()}
           </div>
         </motion.div>
 

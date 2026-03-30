@@ -10,9 +10,9 @@ import { PAGE_SIZE } from "../hooks/useOrdersFilterPaginate";
 const SMOOTH = { type: "spring", stiffness: 260, damping: 26 } as const;
 
 const STATUS_CFG: Record<OrderStatus, { label: string; color: string; bg: string; border: string }> = {
-  Pendiente: { label: "Pendiente", color: "#F59E0B", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.35)" },
-  "En Ruta": { label: "En Ruta",   color: "#155DFC", bg: "rgba(21,93,252,0.12)",  border: "rgba(21,93,252,0.35)"  },
-  Entregado: { label: "Entregado", color: "#4ade80", bg: "rgba(74,222,128,0.12)", border: "rgba(74,222,128,0.35)" },
+  Pendiente: { label: "Pendiente", color: "#F59E0B", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)" },
+  "En Ruta": { label: "En Ruta",   color: "#155DFC", bg: "rgba(21,93,252,0.12)",  border: "rgba(21,93,252,0.25)"  },
+  Entregado: { label: "Entregado", color: "#10B981", bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.25)" },
 };
 
 const AVATAR_COLORS: Record<string, string> = {
@@ -186,8 +186,10 @@ export function OrdersTable({
                         <p className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>{order.zone}</p>
                       </div>
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black text-white shrink-0"
-                          style={{ backgroundColor: AVATAR_COLORS[order.driverInitials] ?? "#64748B" }}>
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0 text-white"
+                          style={{
+                            backgroundColor: AVATAR_COLORS[order.driverInitials] || "#64748B",
+                          }}>
                           {order.driverInitials}
                         </div>
                         <p className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>
@@ -277,8 +279,10 @@ export function OrdersTable({
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center text-[8px] font-black text-white shrink-0"
-                        style={{ backgroundColor: AVATAR_COLORS[order.driverInitials] ?? "#64748B" }}>
+                      <div className="w-5 h-5 rounded-md flex items-center justify-center text-[8px] font-black shrink-0 text-white"
+                        style={{
+                          backgroundColor: AVATAR_COLORS[order.driverInitials] || "#64748B",
+                        }}>
                         {order.driverInitials}
                       </div>
                       <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{order.driver.split(" ")[0]}</p>

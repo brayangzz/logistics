@@ -89,11 +89,12 @@ function ModalBody({ d, onClose }: { d: Delivery; onClose: () => void }) {
         {/* Desktop table */}
         <div className="hidden sm:flex flex-col flex-1 min-h-0 rounded-xl overflow-hidden"
           style={{ border: "1px solid var(--border-color)" }}>
-          <div className="grid text-[9px] font-bold uppercase tracking-widest px-3 py-2 shrink-0"
-            style={{ gridTemplateColumns: "1fr 52px 60px 70px", backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-muted)" }}>
+          <div className="grid text-[9px] font-bold uppercase tracking-widest px-4 py-2 shrink-0"
+            style={{ gridTemplateColumns: "1fr 48px 64px 76px 84px", backgroundColor: "var(--bg-tertiary)", borderBottom: "1px solid var(--border-color)", color: "var(--text-muted)" }}>
             <span>Descripción</span>
-            <span className="text-right">Cant.</span>
-            <span className="text-right">P.Unit</span>
+            <span className="text-right pr-2">Cant.</span>
+            <span className="pl-1">Unidad</span>
+            <span className="text-right pr-2">P.Unit</span>
             <span className="text-right">Subtotal</span>
           </div>
           <div className="overflow-y-auto flex-1">
@@ -101,20 +102,18 @@ function ModalBody({ d, onClose }: { d: Delivery; onClose: () => void }) {
               const almCfg = ALMACEN_CFG[alm] ?? { color: "var(--text-muted)", bg: "transparent" };
               return (
                 <div key={alm}>
-                  {/* Almacén header row */}
-                  <div className="flex items-center gap-2 px-3 py-1.5"
+                  <div className="flex items-center gap-2 px-4 py-1.5"
                     style={{ backgroundColor: almCfg.bg, borderBottom: "1px solid var(--border-color)" }}>
                     <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: almCfg.color }}>{alm}</span>
                   </div>
                   {items.map((item, idx) => (
                     <div key={`${alm}-${item.descripcion}-${idx}`}
-                      className="grid items-center px-3 py-2.5 text-xs"
-                      style={{ gridTemplateColumns: "1fr 52px 60px 70px", borderBottom: "1px solid var(--border-color)" }}>
-                      <span className="font-semibold pr-3 leading-snug" style={{ color: "var(--text-primary)" }}>{item.descripcion}</span>
-                      <span className="text-right font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
-                        {item.cantidad} <span className="font-normal text-[10px]" style={{ color: "var(--text-muted)" }}>{item.unidad}</span>
-                      </span>
-                      <span className="text-right tabular-nums" style={{ color: "var(--text-secondary)" }}>{fmt$(item.precioUnit)}</span>
+                      className="grid items-center px-4 py-2.5 text-xs"
+                      style={{ gridTemplateColumns: "1fr 48px 64px 76px 84px", borderBottom: "1px solid var(--border-color)" }}>
+                      <span className="font-semibold pr-4 leading-snug" style={{ color: "var(--text-primary)" }}>{item.descripcion}</span>
+                      <span className="text-right pr-2 font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{item.cantidad}</span>
+                      <span className="pl-1 text-[10px]" style={{ color: "var(--text-muted)" }}>{item.unidad}</span>
+                      <span className="text-right pr-2 tabular-nums" style={{ color: "var(--text-secondary)" }}>{fmt$(item.precioUnit)}</span>
                       <span className="text-right font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{fmt$(item.subtotal)}</span>
                     </div>
                   ))}
