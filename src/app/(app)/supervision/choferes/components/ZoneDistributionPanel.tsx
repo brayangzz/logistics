@@ -33,8 +33,8 @@ export function ZoneDistributionPanel({ zoneData, driverColor, driverInitials }:
           <MapPin className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-extrabold" style={{ color: "var(--text-primary)" }}>Por zona</p>
-          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{zoneData.length} zona{zoneData.length !== 1 ? "s" : ""} activa{zoneData.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm font-extrabold" style={{ color: "var(--text-primary)" }}>Por bloque</p>
+          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{zoneData.length} bloque{zoneData.length !== 1 ? "s" : ""} activo{zoneData.length !== 1 ? "s" : ""}</p>
         </div>
       </div>
 

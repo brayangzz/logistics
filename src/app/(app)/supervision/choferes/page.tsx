@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ScrollText, MapPin, CheckCircle2, ChevronDown,
-  Search, X, Calendar, Package, Weight,
+  MapPin, CheckCircle2, ChevronDown,
+  Search, X, Calendar, Package,
   ArrowLeft, ChevronLeft, ChevronRight, Clock,
   Eye, TrendingUp,
 } from "lucide-react";
@@ -55,7 +55,7 @@ export default function HistorialChoferPage() {
     return () => window.removeEventListener("keydown", h);
   }, []);
 
-  const { driverDeliveries, entregadosCount, enRutaCount, pendientesCount, totalDeliveries, hourData, zoneData } =
+  const { driverDeliveries, entregadosCount, enRutaCount, pendientesCount, activityData, hoursEnRuta, zoneData } =
     useDriverDeliveryMetrics(selectedDriver.initials, DELIVERIES);
 
   const {
@@ -88,10 +88,6 @@ export default function HistorialChoferPage() {
           </motion.div>
           <div className="min-w-0 flex-1">
             <h1 className="text-lg sm:text-2xl font-extrabold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>{selectedDriver.name}</h1>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <ScrollText className="w-3 h-3 shrink-0" style={{ color: "var(--text-muted)" }} />
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{totalDeliveries} facturas · {selectedDriver.total} totales</p>
-            </div>
           </div>
         </motion.div>
 
@@ -129,7 +125,7 @@ export default function HistorialChoferPage() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4">
-          <HourlyActivityChart hourData={hourData} driverColor={selectedDriver.color} driverInitials={selectedDriver.initials} />
+          <HourlyActivityChart activityData={activityData} hoursEnRuta={hoursEnRuta} driverColor={selectedDriver.color} driverInitials={selectedDriver.initials} />
           <ZoneDistributionPanel zoneData={zoneData} driverColor={selectedDriver.color} driverInitials={selectedDriver.initials} />
         </div>
 
@@ -214,7 +210,7 @@ export default function HistorialChoferPage() {
             <div className="relative flex items-center w-full sm:flex-1 min-w-[200px] max-w-none sm:max-w-sm rounded-xl"
               style={{ boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.14)" : "none" }}>
               <Search className="absolute left-3 w-3.5 h-3.5 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-              <input type="text" placeholder="Buscar factura, cliente, zona..." value={search}
+              <input type="text" placeholder="Buscar factura, cliente, bloque..." value={search}
                 onChange={e => { setSearch(e.target.value); resetPage(); }}
                 onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)}
                 className="w-full pl-8 pr-7 py-2 rounded-xl border text-xs focus:outline-none"
@@ -235,7 +231,7 @@ export default function HistorialChoferPage() {
             <div style={{ minWidth: 1100 }}>
               <div className="grid px-6 py-3 gap-x-6"
                 style={{ gridTemplateColumns: COL, borderBottom: "1px solid var(--border-color)", backgroundColor: "var(--bg-tertiary)" }}>
-                {["Factura", "Cliente", "Destino", "Zona", "Fecha / Hora", "Estado", "F. Entrega", ""].map(h => (
+                {["Factura", "Cliente", "Destino", "Bloque", "Fecha / Hora", "Estado", "F. Entrega", ""].map(h => (
                   <p key={h} className="text-[10px] font-bold uppercase tracking-widest whitespace-nowrap" style={{ color: "var(--text-muted)" }}>{h}</p>
                 ))}
               </div>

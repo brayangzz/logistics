@@ -1,31 +1,45 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BarChart2 } from "lucide-react";
-import { XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from "recharts";
+import { Activity } from "lucide-react";
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import type { ActivityPoint } from "../hooks/useDriverDeliveryMetrics";
 
-interface HourlyData { label: string; hour: number; count: number; }
+interface TooltipProps {
+  active?: boolean;
+  payload?: { payload: ActivityPoint }[];
+  driverColor: string;
+}
 
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+function ActivityTooltip({ active, payload, driverColor }: TooltipProps) {
   if (!active || !payload?.length) return null;
+  const point    = payload[0].payload;
+  const hh       = String(Math.floor(point.minutes / 60)).padStart(2, "0");
+  const mm       = String(point.minutes % 60).padStart(2, "0");
+  const isEnRuta = point.value === 1;
   return (
     <div className="rounded-xl px-3 py-2 text-xs font-semibold shadow-2xl"
-      style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", color: "var(--text-primary)" }}>
-      {label && <p className="mb-1 text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>{label}</p>}
-      {payload.map((p, i) => <p key={i} className="font-bold">{p.value} entrega{p.value !== 1 ? "s" : ""}</p>)}
+      style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", minWidth: 90 }}>
+      <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>{hh}:{mm}</p>
+      <p className="font-bold" style={{ color: isEnRuta ? driverColor : "var(--text-secondary)" }}>
+        {isEnRuta ? "En Ruta" : "Libre"}
+      </p>
     </div>
   );
 }
 
 interface HourlyActivityChartProps {
-  hourData: HourlyData[];
+  activityData: ActivityPoint[];
+  hoursEnRuta: number;
   driverColor: string;
   driverInitials: string;
 }
 
-export function HourlyActivityChart({ hourData, driverColor, driverInitials }: HourlyActivityChartProps) {
-  const maxCount = Math.max(...hourData.map(h => h.count), 1);
-  const totalHourDeliveries = hourData.reduce((s, h) => s + h.count, 0);
+export function HourlyActivityChart({ activityData, hoursEnRuta, driverColor, driverInitials }: HourlyActivityChartProps) {
+  const gradientId = `actGrad-${driverInitials}`;
 
   return (
     <motion.div
@@ -40,33 +54,67 @@ export function HourlyActivityChart({ hourData, driverColor, driverInitials }: H
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: `radial-gradient(ellipse at top left, ${driverColor}0a 0%, transparent 60%)` }} />
 
-      <div className="relative flex items-center gap-2.5 mb-4">
+      <div className="relative flex items-center gap-2.5 mb-5">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
           style={{ background: `linear-gradient(135deg,${driverColor},${driverColor}99)`, boxShadow: `0 0 14px ${driverColor}40` }}>
-          <BarChart2 className="w-4 h-4 text-white" />
+          <Activity className="w-4 h-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-extrabold" style={{ color: "var(--text-primary)" }}>Actividad de entregas</p>
-          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>Horario 8:00 – 18:30 · {totalHourDeliveries} entregas</p>
+          <p className="text-sm font-extrabold" style={{ color: "var(--text-primary)" }}>Actividad del chofer</p>
+          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            Horario 8:00 – 18:30 · {hoursEnRuta} hora{hoursEnRuta !== 1 ? "s" : ""} en ruta
+          </p>
+        </div>
+        <div className="ml-auto flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: driverColor }} />
+            <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>En Ruta</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--border-color)" }} />
+            <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>Libre</span>
+          </div>
         </div>
       </div>
 
       <ResponsiveContainer width="100%" height={150}>
-        <BarChart data={hourData} margin={{ top: 4, right: 4, left: -28, bottom: 0 }} barCategoryGap="22%">
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-          <XAxis dataKey="label" tick={{ fontSize: 9, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 9, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} allowDecimals={false} width={22} />
-          <Tooltip content={<ChartTooltip />} cursor={{ fill: `${driverColor}10` }} />
-          <Bar dataKey="count" radius={[5, 5, 2, 2]} animationBegin={300} animationDuration={700} animationEasing="ease-out">
-            {hourData.map((entry) => (
-              <Cell
-                key={entry.label}
-                fill={entry.count === maxCount && maxCount > 0 ? driverColor : `${driverColor}40`}
-                style={entry.count === maxCount && maxCount > 0 ? { filter: `drop-shadow(0 0 6px ${driverColor}80)` } : {}}
+        <AreaChart data={activityData} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%"  stopColor={driverColor} stopOpacity={0.55} />
+              <stop offset="95%" stopColor={driverColor} stopOpacity={0}    />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 9, fill: "var(--text-muted)" }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis hide domain={[0, 1]} />
+          <Tooltip
+            content={(props) => (
+              <ActivityTooltip
+                active={props.active}
+                payload={props.payload as { payload: ActivityPoint }[] | undefined}
+                driverColor={driverColor}
               />
-            ))}
-          </Bar>
-        </BarChart>
+            )}
+            cursor={{ stroke: `${driverColor}30`, strokeWidth: 1 }}
+          />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke={driverColor}
+            strokeWidth={2}
+            fill={`url(#${gradientId})`}
+            dot={false}
+            activeDot={{ r: 4, fill: driverColor, stroke: "var(--bg-secondary)", strokeWidth: 2 }}
+            animationBegin={300}
+            animationDuration={900}
+            animationEasing="ease-out"
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </motion.div>
   );
