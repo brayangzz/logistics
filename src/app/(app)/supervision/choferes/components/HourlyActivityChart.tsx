@@ -96,7 +96,7 @@ export function HourlyActivityChart({ activityData, hoursEnRuta, driverColor, dr
             content={(props) => (
               <ActivityTooltip
                 active={props.active}
-                payload={props.payload as { payload: ActivityPoint }[] | undefined}
+                payload={props.payload as unknown as { payload: ActivityPoint }[] | undefined}
                 driverColor={driverColor}
               />
             )}
