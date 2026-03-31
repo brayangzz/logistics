@@ -147,9 +147,9 @@ export const OrderAssignmentCard = ({ order, onAssign, onToast, index }: OrderAs
       <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
 
         {/* Row 1: Factura + estado */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-x-2 flex-wrap gap-y-1">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color: "var(--text-primary)" }}>
+            <span className="text-[18px] font-extrabold tracking-tight leading-none truncate min-w-0" style={{ color: "var(--text-primary)" }}>
               {order.invoiceNumber}
             </span>
             {order.anticipated && (
@@ -159,7 +159,7 @@ export const OrderAssignmentCard = ({ order, onAssign, onToast, index }: OrderAs
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0"
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full shrink-0"
             style={{ backgroundColor: s.bg, border: `1px solid ${s.border}` }}>
             {order.state === "Pendiente" ? (
               <span className="relative flex h-2 w-2 shrink-0">

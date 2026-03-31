@@ -183,8 +183,8 @@ export function DeliveryDetailModal({ delivery, onClose }: DeliveryDetailModalPr
       <motion.div key="modal-desktop"
         initial={{ opacity: 0, scale: 0.94, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.94, y: 16 }} transition={SPRING}
-        className="fixed inset-0 z-[9999] hidden md:flex items-center justify-center p-6 pointer-events-none">
-        <div className="w-full max-w-xl h-auto max-h-[85vh] rounded-3xl p-5 pointer-events-auto flex flex-col"
+        className="fixed inset-0 md:left-[240px] lg:left-[280px] z-[9999] hidden md:flex items-center justify-center p-6 pointer-events-none">
+        <div className="w-full max-w-xl lg:max-w-2xl h-auto max-h-[85vh] rounded-3xl p-5 pointer-events-auto flex flex-col"
           style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)", boxShadow: "0 32px 80px rgba(0,0,0,0.5)" }}>
           <ModalBody d={delivery} onClose={onClose} />
         </div>

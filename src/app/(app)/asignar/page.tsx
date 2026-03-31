@@ -44,7 +44,7 @@ export default function AsignarPage() {
               <MapIcon className="w-5 h-5 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>
+              <h1 className="text-xl md:text-2xl xl:text-3xl font-extrabold tracking-tight leading-tight" style={{ color: "var(--text-primary)" }}>
                 Asignación de Rutas
               </h1>
               <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
@@ -53,7 +53,7 @@ export default function AsignarPage() {
             </div>
           </div>
           {/* Search desktop */}
-          <div className="relative hidden sm:flex items-center w-64 lg:w-72 shrink-0 rounded-2xl"
+          <div className="relative hidden sm:flex items-center w-56 lg:w-64 shrink-0 rounded-2xl"
             style={{ boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.14)" : "none", transition: "box-shadow 0.15s ease" }}>
             <Search className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: "var(--text-muted)" }} />
             <input type="text" placeholder="Buscar factura o cliente..."
@@ -203,7 +203,7 @@ export default function AsignarPage() {
         </AnimatePresence>
 
         {/* Grid de órdenes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" style={{ overflow: "visible" }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" style={{ overflow: "visible" }}>
           <AnimatePresence mode="popLayout">
             {filtered.map((order, i) => (
               <OrderAssignmentCard key={order.id} order={order} onAssign={handleAssign}

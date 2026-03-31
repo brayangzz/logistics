@@ -68,19 +68,19 @@ export function UnitCard({ unit, index, onUpdate }: UnitCardProps) {
         style={{ padding: 24, display: "flex", flexDirection: "column", gap: 18 }}>
 
         {/* Header: número + badge */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-x-2 flex-wrap gap-y-1">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: s.bg }}>
               <Truck className="w-[18px] h-[18px] text-white" />
             </div>
             <div className="min-w-0">
-              <span className="text-[22px] font-extrabold tracking-tight leading-none" style={{ color: "var(--text-primary)" }}>
+              <span className="text-[18px] font-extrabold tracking-tight leading-none truncate min-w-0 block" style={{ color: "var(--text-primary)" }}>
                 Unidad {unit.numero}
               </span>
               <p className="text-xs mt-1 truncate" style={{ color: "var(--text-secondary)" }}>{unit.modelo}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0" style={{ backgroundColor: s.bg }}>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: s.bg }}>
             {unit.estado === "disponible" ? (
               <span className="relative flex h-1.5 w-1.5 shrink-0">
                 <span className="animate-ping absolute inset-0 rounded-full bg-white/60" />

@@ -38,7 +38,7 @@ export const LogisticsFiltersPanel = ({
   onCalendarDateChange,
 }: LogisticsFiltersProps) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 relative z-10 w-full flex-wrap">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-3 relative z-10 w-full lg:flex-1 lg:min-w-0 flex-wrap">
       {/* Search Input */}
       <div className="relative group w-full sm:w-auto sm:flex-1 sm:max-w-[260px]">
         <Search
@@ -61,7 +61,7 @@ export const LogisticsFiltersPanel = ({
       </div>
 
       {/* Selects — 2 cols on mobile, inline on sm+ */}
-      <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-3">
         <CustomSelect
           id="sort-select"
           value={sortBy}
