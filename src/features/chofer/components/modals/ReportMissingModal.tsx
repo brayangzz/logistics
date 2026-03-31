@@ -7,7 +7,9 @@ import { AlertTriangle, X, Send, CheckCircle2, Minus, Plus } from "lucide-react"
 import { InvoiceItem } from "../../models";
 
 const WH_COLOR: Record<string, string> = { Herrajes: "#F59E0B", Aluminio: "#155DFC", Vidrio: "#10B981" };
+const WH_ORDER = ["Herrajes", "Aluminio", "Vidrio"] as const;
 const EASE = [0.22, 1, 0.36, 1] as const;
+const SPRING = { type: "spring", stiffness: 400, damping: 28 } as const;
 
 interface ReportMissingModalProps {
   items: InvoiceItem[];
@@ -21,6 +23,14 @@ export const ReportMissingModal = ({ items, onClose, onSubmit }: ReportMissingMo
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  const itemsByWarehouse = useMemo(() =>
+    items.reduce((acc: Record<string, InvoiceItem[]>, item) => {
+      if (!acc[item.warehouse]) acc[item.warehouse] = [];
+      acc[item.warehouse].push(item);
+      return acc;
+    }, {}),
+    [items]);
 
   const reportList = useMemo(
     () => items.filter((i) => qtys[i.id] > 0).map((i) => ({ itemId: i.id, qty: qtys[i.id] })),
@@ -46,140 +56,219 @@ export const ReportMissingModal = ({ items, onClose, onSubmit }: ReportMissingMo
         key="backdrop"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
-        className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4"
-        style={{ backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+        className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-4"
+        style={{ backgroundColor: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)" }}
         onClick={onClose}
       >
         <motion.div
           key="panel"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.96, y: 24 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={{ opacity: 0, scale: 0.96, y: 24 }}
           transition={{ duration: 0.24, ease: EASE }}
-          className="w-full max-w-md rounded-3xl border flex flex-col overflow-hidden"
-          style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)", boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)", maxHeight: "90vh" }}
+          className="w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl border flex flex-col overflow-hidden"
+          style={{
+            backgroundColor: "var(--bg-secondary)",
+            borderColor: "var(--border-color)",
+            boxShadow: "0 32px 64px -12px rgba(0,0,0,0.6)",
+            maxHeight: "92vh",
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           {submitted ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              className="px-6 py-12 flex flex-col items-center justify-center text-center space-y-4"
+              className="px-6 py-14 flex flex-col items-center justify-center text-center gap-4"
             >
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-2">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}>
                 <CheckCircle2 className="w-8 h-8 text-green-500" />
               </div>
-              <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Reporte enviado</h3>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Se ha notificado al almacén sobre el material faltante.</p>
+              <div>
+                <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Reporte enviado</h3>
+                <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+                  Se notificó al almacén sobre el material faltante.
+                </p>
+              </div>
             </motion.div>
           ) : (
             <>
-              <div className="flex items-center justify-between px-5 py-4 border-b shrink-0" style={{ borderColor: "var(--border-color)" }}>
+              {/* HEADER */}
+              <div className="flex items-center justify-between px-5 py-4 border-b shrink-0"
+                style={{ borderColor: "var(--border-color)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-red-500/10 border border-red-500/20">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}>
                     <AlertTriangle className="w-4 h-4 text-red-500" strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-extrabold text-red-500">Reportar Faltante</h3>
-                    <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>Indica cuánto falta de cada material</p>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-sm font-extrabold text-red-500">Reportar Faltante</h3>
+                      <AnimatePresence>
+                        {reportList.length > 0 && (
+                          <motion.span
+                            key="badge"
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={SPRING}
+                            className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-extrabold bg-red-500 text-white"
+                          >
+                            {reportList.length}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                      Indica cuánto falta de cada material
+                    </p>
                   </div>
                 </div>
                 <motion.button
-                  whileTap={{ scale: 0.9 }} onClick={onClose}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center focus:outline-none hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  whileTap={{ scale: 0.88 }} onClick={onClose}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center focus:outline-none"
+                  style={{ color: "var(--text-muted)" }}
                 >
-                  <X className="w-4 h-4" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
+                  <X className="w-4 h-4" strokeWidth={2.5} />
                 </motion.button>
               </div>
 
-              <div className="overflow-y-auto flex-1">
-                {items.map((item, idx) => {
-                  const qty = qtys[item.id] ?? 0;
-                  const active = qty > 0;
-                  return (
-                    <motion.div
-                      key={item.id}
-                      animate={{ backgroundColor: "transparent" }}
-                      transition={{ duration: 0.2 }}
-                      className="px-5 py-4"
-                      style={{ borderBottom: idx < items.length - 1 ? "1px solid var(--border-color)" : "none" }}
+              {/* SCROLLABLE LIST */}
+              <div className="overflow-y-auto flex-1 py-1">
+                {WH_ORDER.filter((wh) => itemsByWarehouse[wh]?.length).map((wh) => (
+                  <div key={wh}>
+                    {/* Warehouse section header */}
+                    <div
+                      className="flex items-center gap-2 mx-5 my-2 pl-3 py-1.5 rounded-lg"
+                      style={{
+                        borderLeft: `3px solid ${WH_COLOR[wh]}`,
+                        backgroundColor: "var(--bg-tertiary)",
+                        border: `1px solid var(--border-color)`,
+                        borderLeftColor: WH_COLOR[wh],
+                        borderLeftWidth: "3px",
+                      }}
                     >
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div
-                            className="w-1.5 h-8 rounded-full shrink-0"
-                            style={{ backgroundColor: active ? "#EF4444" : (WH_COLOR[item.warehouse] ?? "#64748B") }}
-                          />
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: active ? "#EF4444" : "var(--text-secondary)" }}>
-                              {item.warehouse}
-                            </p>
-                            <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>{item.description}</p>
-                          </div>
-                        </div>
-                        <motion.button
-                          whileTap={{ scale: 0.88 }}
-                          onClick={() => setQty(item.id, active ? 0 : 1)}
-                          className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold focus:outline-none transition-all"
-                          style={active
-                            ? { backgroundColor: "rgba(239,68,68,0.12)", color: "#EF4444", border: "1px solid rgba(239,68,68,0.25)" }
-                            : { backgroundColor: "var(--bg-tertiary)", color: "var(--text-secondary)", border: "1px solid var(--border-color)" }
-                          }
-                        >
-                          {active ? "Quitar" : "+ Falta"}
-                        </motion.button>
-                      </div>
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest"
+                        style={{ color: WH_COLOR[wh] }}>
+                        {wh}
+                      </span>
+                      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        · {itemsByWarehouse[wh].length} ítem{itemsByWarehouse[wh].length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
 
-                      <AnimatePresence initial={false}>
-                        {active && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.22, ease: EASE }}
-                            style={{ overflow: "hidden" }}
-                          >
-                            <div className="h-px w-full mt-3 mb-3" style={{ backgroundColor: "var(--border-color)" }} />
-                            <div className="flex justify-center">
-                              <div
-                                className="flex items-center gap-5 px-6 py-4 rounded-2xl"
-                                style={{ backgroundColor: "var(--bg-primary)", border: "1px solid var(--border-color)" }}
-                              >
-                                <motion.button
-                                  whileTap={{ scale: 0.85 }}
-                                  onClick={() => setQty(item.id, Math.max(1, qty - 1))}
-                                  className="w-12 h-12 rounded-xl flex items-center justify-center focus:outline-none disabled:opacity-25 shrink-0"
-                                  style={{ backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}
-                                  disabled={qty <= 1}
-                                >
-                                  <Minus className="w-5 h-5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
-                                </motion.button>
-                                <span className="text-8xl font-extrabold tabular-nums leading-none" style={{ color: "var(--text-primary)", minWidth: "2ch", textAlign: "center" }}>
-                                  {qty}
-                                </span>
-                                <motion.button
-                                  whileTap={{ scale: 0.85 }}
-                                  onClick={() => setQty(item.id, Math.min(item.quantity, qty + 1))}
-                                  className="w-12 h-12 rounded-xl flex items-center justify-center focus:outline-none disabled:opacity-25 shrink-0"
-                                  style={{ backgroundColor: "var(--bg-tertiary)", border: "1px solid var(--border-color)" }}
-                                  disabled={qty >= item.quantity}
-                                >
-                                  <Plus className="w-5 h-5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
-                                </motion.button>
+                    {/* Items */}
+                    {itemsByWarehouse[wh].map((item, idx) => {
+                      const qty = qtys[item.id] ?? 0;
+                      const active = qty > 0;
+                      const isLast = idx === itemsByWarehouse[wh].length - 1;
+                      return (
+                        <div
+                          key={item.id}
+                          className="px-5 py-3.5"
+                          style={{ borderBottom: !isLast ? "1px solid var(--border-color)" : "none" }}
+                        >
+                          {/* Row: description + toggle button */}
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-1 h-9 rounded-full shrink-0"
+                                style={{ backgroundColor: active ? "#EF4444" : WH_COLOR[wh] }} />
+                              <div className="min-w-0">
+                                <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                                  {item.description}
+                                </p>
+                                <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                  ×{item.quantity} unidades
+                                </p>
                               </div>
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  );
-                })}
+                            <motion.button
+                              whileTap={{ scale: 0.88 }}
+                              onClick={() => setQty(item.id, active ? 0 : 1)}
+                              className="shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold focus:outline-none"
+                              style={active
+                                ? { backgroundColor: "var(--bg-tertiary)", color: "#EF4444", border: "1px solid var(--border-color)" }
+                                : { backgroundColor: "var(--bg-tertiary)", color: "var(--text-secondary)", border: "1px solid var(--border-color)" }
+                              }
+                            >
+                              {active ? "Quitar" : "+ Falta"}
+                            </motion.button>
+                          </div>
+
+                          {/* Accordion counter */}
+                          <AnimatePresence initial={false}>
+                            {active && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.26, ease: EASE }}
+                                style={{ overflow: "hidden" }}
+                              >
+                                <div className="mt-3 flex items-center justify-between gap-2 px-1 pb-2">
+                                  {/* Decrement */}
+                                  <motion.button
+                                    whileTap={{ scale: 0.82 }}
+                                    onClick={() => setQty(item.id, Math.max(1, qty - 1))}
+                                    disabled={qty <= 1}
+                                    className="w-14 h-14 rounded-2xl flex items-center justify-center focus:outline-none disabled:opacity-30 shrink-0"
+                                    style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}
+                                  >
+                                    <Minus className="w-5 h-5" style={{ color: "var(--text-primary)" }} strokeWidth={2.5} />
+                                  </motion.button>
+
+                                  {/* Quantity */}
+                                  <div className="flex-1 flex items-center justify-center py-2" style={{ overflow: "visible" }}>
+                                    <AnimatePresence mode="popLayout" initial={false}>
+                                      <motion.span
+                                        key={qty}
+                                        initial={{ y: -20, opacity: 0, scale: 0.75 }}
+                                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                                        exit={{ y: 20, opacity: 0, scale: 0.75 }}
+                                        transition={SPRING}
+                                        className="font-extrabold tabular-nums leading-none"
+                                        style={{ color: "#EF4444", fontSize: "2.25rem" }}
+                                      >
+                                        {qty}
+                                      </motion.span>
+                                    </AnimatePresence>
+                                  </div>
+
+                                  {/* Increment */}
+                                  <motion.button
+                                    whileTap={{ scale: 0.82 }}
+                                    onClick={() => setQty(item.id, Math.min(item.quantity, qty + 1))}
+                                    disabled={qty >= item.quantity}
+                                    className="w-14 h-14 rounded-2xl flex items-center justify-center focus:outline-none disabled:opacity-30 shrink-0"
+                                    style={{ backgroundColor: "#EF4444" }}
+                                  >
+                                    <Plus className="w-5 h-5 text-white" strokeWidth={2.5} />
+                                  </motion.button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
 
-              <div className="p-4 border-t shrink-0" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-tertiary)" }}>
+              {/* FOOTER */}
+              <div className="p-4 border-t shrink-0"
+                style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-tertiary)" }}>
                 <motion.button
-                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  whileHover={reportList.length > 0 ? { scale: 1.02 } : {}}
+                  whileTap={reportList.length > 0 ? { scale: 0.97 } : {}}
                   onClick={handleSubmit}
                   disabled={isSubmitting || reportList.length === 0}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-sm font-bold shadow-lg shadow-red-500/20 focus:outline-none transition-all disabled:opacity-50 disabled:scale-100"
-                  style={{ backgroundColor: "#EF4444", color: "#FFFFFF" }}
+                  className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl text-sm font-bold focus:outline-none transition-all disabled:opacity-50"
+                  style={{
+                    backgroundColor: "#EF4444",
+                    color: "#FFFFFF",
+                    boxShadow: "none",
+                  }}
                 >
                   {isSubmitting ? (
                     <motion.div
@@ -189,8 +278,19 @@ export const ReportMissingModal = ({ items, onClose, onSubmit }: ReportMissingMo
                     />
                   ) : (
                     <>
-                      <Send className="w-4 h-4" strokeWidth={2.5} />
-                      Enviar Reporte{reportList.length > 0 ? ` (${reportList.length})` : ""}
+                      <motion.div
+                        whileHover={{ x: 3, rotate: -12 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="flex items-center"
+                      >
+                        <Send className="w-4 h-4" strokeWidth={2.5} />
+                      </motion.div>
+                      Enviar Reporte
+                      {reportList.length > 0 && (
+                        <span className="px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-white/20">
+                          {reportList.length}
+                        </span>
+                      )}
                     </>
                   )}
                 </motion.button>

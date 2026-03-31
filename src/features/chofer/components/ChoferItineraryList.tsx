@@ -1,9 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChoferRoute } from "../models";
-import { MapPin, FileText, Route } from "lucide-react";
+import { MapPin, FileText, Route, ChevronLeft, ChevronRight } from "lucide-react";
+
+const SPRING = { type: "spring", stiffness: 400, damping: 28 } as const;
 
 interface ChoferItineraryListProps {
   route: ChoferRoute;
@@ -16,6 +19,18 @@ export const ChoferItineraryList = ({
   selectedInvoiceId,
   onSelectInvoice,
 }: ChoferItineraryListProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const invoices = route.invoices;
+  const currentIndex = invoices.findIndex((inv) => inv.id === selectedInvoiceId);
+
+  const navigate = (dir: -1 | 1) => {
+    const next = currentIndex + dir;
+    if (next < 0 || next >= invoices.length) return;
+    onSelectInvoice(invoices[next].id);
+    const card = scrollRef.current?.children[next] as HTMLElement | undefined;
+    card?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  };
+
   return (
     <div className="flex flex-col gap-3">
       {/* Header card */}
@@ -31,7 +46,7 @@ export const ChoferItineraryList = ({
             Ruta del Día
           </h2>
           <div className="text-lg font-extrabold" style={{ color: "var(--text-primary)" }}>
-            {route.invoices.length} Facturas
+            {invoices.length} Facturas
           </div>
         </div>
         <div
@@ -43,8 +58,11 @@ export const ChoferItineraryList = ({
       </div>
 
       {/* Scrollable list */}
-      <div className="flex flex-row md:flex-col overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-3 pb-3 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 md:mx-0 px-4 md:px-0">
-        {route.invoices.map((invoice, index) => {
+      <div
+        ref={scrollRef}
+        className="flex flex-row md:flex-col overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-3 pb-1 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 md:mx-0 px-4 md:px-0"
+      >
+        {invoices.map((invoice, index) => {
           const isSelected = selectedInvoiceId === invoice.id;
 
           return (
@@ -76,7 +94,7 @@ export const ChoferItineraryList = ({
                 }
               }}
             >
-              {/* Active left bar (desktop) */}
+              {/* Active bar */}
               {isSelected && (
                 <>
                   <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[3px] bg-[#155DFC] rounded-r-full shadow-[0_0_10px_rgba(21,93,252,0.7)]" />
@@ -115,7 +133,7 @@ export const ChoferItineraryList = ({
                 </div>
               </div>
 
-              {/* Single ready badge */}
+              {/* Ready badge */}
               <div
                 className="flex items-center gap-2 px-3 py-2 rounded-xl border"
                 style={{ backgroundColor: "rgba(16,185,129,0.06)", borderColor: "rgba(16,185,129,0.2)" }}
@@ -130,6 +148,37 @@ export const ChoferItineraryList = ({
           );
         })}
       </div>
+
+      {/* Mobile prev/next nav — hidden on desktop */}
+      {invoices.length > 1 && (
+        <div className="flex items-center justify-between md:hidden px-1">
+          <motion.button
+            whileTap={{ scale: 0.88 }} whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(21,93,252,0.7)" }}
+            transition={SPRING}
+            onClick={() => navigate(-1)}
+            disabled={currentIndex <= 0}
+            className="flex items-center justify-center rounded-full focus:outline-none disabled:opacity-30"
+            style={{ width: 36, height: 36, backgroundColor: "#155DFC", boxShadow: "0 0 14px rgba(21,93,252,0.5)", border: "1px solid rgba(21,93,252,0.6)" }}
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </motion.button>
+
+          <span className="text-xs font-bold tabular-nums" style={{ color: "var(--text-muted)" }}>
+            {currentIndex + 1} / {invoices.length}
+          </span>
+
+          <motion.button
+            whileTap={{ scale: 0.88 }} whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(21,93,252,0.7)" }}
+            transition={SPRING}
+            onClick={() => navigate(1)}
+            disabled={currentIndex >= invoices.length - 1}
+            className="flex items-center justify-center rounded-full focus:outline-none disabled:opacity-30"
+            style={{ width: 36, height: 36, backgroundColor: "#155DFC", boxShadow: "0 0 14px rgba(21,93,252,0.5)", border: "1px solid rgba(21,93,252,0.6)" }}
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </motion.button>
+        </div>
+      )}
     </div>
   );
 };
