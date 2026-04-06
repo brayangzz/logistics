@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Map as MapIcon, TrendingUp } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { FilterState, ViewMode } from "./asignar.types";
 import { OrderAssignmentCard } from "./components/OrderAssignmentCard";
 import { ToastContainer } from "./components/SuccessToast";
@@ -203,14 +203,16 @@ export default function AsignarPage() {
         </AnimatePresence>
 
         {/* Grid de órdenes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4" style={{ overflow: "visible" }}>
-          <AnimatePresence mode="popLayout">
-            {filtered.map((order, i) => (
-              <OrderAssignmentCard key={order.id} order={order} onAssign={handleAssign}
-                onToast={handleToast} index={i} />
-            ))}
-          </AnimatePresence>
-        </div>
+        <LayoutGroup>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 items-stretch" style={{ overflow: "visible" }}>
+            <AnimatePresence mode="popLayout">
+              {filtered.map((order, i) => (
+                <OrderAssignmentCard key={order.id} order={order} onAssign={handleAssign}
+                  onToast={handleToast} index={i} />
+              ))}
+            </AnimatePresence>
+          </div>
+        </LayoutGroup>
 
         {/* Empty state */}
         <AnimatePresence>

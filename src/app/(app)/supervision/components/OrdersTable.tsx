@@ -11,7 +11,7 @@ const SMOOTH = { type: "spring", stiffness: 260, damping: 26 } as const;
 
 const STATUS_CFG: Record<OrderStatus, { label: string; color: string; bg: string; border: string }> = {
   Pendiente: { label: "Pendiente", color: "#F59E0B", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.25)" },
-  "En Ruta": { label: "En Ruta",   color: "#155DFC", bg: "rgba(21,93,252,0.12)",  border: "rgba(21,93,252,0.25)"  },
+  "En Ruta": { label: "En Ruta", color: "#155DFC", bg: "rgba(21,93,252,0.12)", border: "rgba(21,93,252,0.25)" },
   Entregado: { label: "Entregado", color: "#10B981", bg: "rgba(16,185,129,0.12)", border: "rgba(16,185,129,0.25)" },
 };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Banknote } from "lucide-react";
 import { useCaja } from "@/features/caja/hooks/useCaja";
 import { CajaChoferPanel } from "./components/CajaChoferPanel";
@@ -12,6 +13,15 @@ export default function CajaPage() {
     marcarEntregado, revertirEntregado, cancelarPedido,
     activosCount,
   } = useCaja();
+
+  const [checkedFolios, setCheckedFolios] = useState<Set<string>>(new Set());
+  useEffect(() => { setCheckedFolios(new Set()); }, [selectedId]);
+  const toggleCheck = (folio: string) =>
+    setCheckedFolios(prev => {
+      const next = new Set(prev);
+      next.has(folio) ? next.delete(folio) : next.add(folio);
+      return next;
+    });
 
   const totalMonto = selected.pedidos.reduce((s, p) => s + p.monto, 0);
 
@@ -52,10 +62,12 @@ export default function CajaPage() {
           <CajaPedidosTable
             selected={selected} selectedId={selectedId}
             totalMonto={totalMonto} cancelarPedido={cancelarPedido}
+            checkedFolios={checkedFolios} toggleCheck={toggleCheck}
           />
           <CajaSummaryActions
             totalMonto={totalMonto} entregado={selected.entregado}
             marcarEntregado={marcarEntregado} revertirEntregado={revertirEntregado}
+            checkedCount={checkedFolios.size} totalCount={selected.pedidos.length}
           />
         </div>
 

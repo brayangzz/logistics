@@ -24,16 +24,18 @@ const FORMA_PAGO_CONFIG = {
   credito:       { label: "Crédito",        color: "#8B5CF6", bg: "rgba(139,92,246,0.08)",  border: "rgba(139,92,246,0.25)"  },
 };
 
-const GRID_COLS = "1fr 1fr 1fr 1.4fr 1fr";
+const GRID_COLS = "1fr 1fr 1fr 1.4fr 1fr auto";
 
 interface Props {
   selected: Chofer;
   selectedId: string;
   totalMonto: number;
   cancelarPedido: (folio: string) => void;
+  checkedFolios: Set<string>;
+  toggleCheck: (folio: string) => void;
 }
 
-export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPedido }: Props) {
+export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPedido, checkedFolios, toggleCheck }: Props) {
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
 
   return (
@@ -210,6 +212,7 @@ export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPed
                 {["FACTURA #", "CLIENTE", "MONTO", "UBICACIÓN", "FORMA DE PAGO"].map(col => (
                   <p key={col} className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>{col}</p>
                 ))}
+                <div />
               </div>
               <AnimatePresence initial={false}>
                 {selected.pedidos.map((p, i) => {
@@ -220,24 +223,64 @@ export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPed
                     <motion.div key={`${selectedId}-${p.folio}`}
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -12 }}
                       transition={{ duration: 0.22, ease: "easeOut" }}>
-                      <div className="grid gap-4 items-center px-5 py-4"
-                        style={{ gridTemplateColumns: GRID_COLS, borderBottom: isLast ? "none" : "1px solid var(--border-color)" }}>
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
-                          <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{p.folio}</span>
-                        </div>
-                        <span className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>{p.cliente}</span>
-                        <span className="text-sm font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{fmt(p.monto)}</span>
-                        <div className="flex items-start gap-1.5 min-w-0">
-                          <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: "var(--text-muted)" }} />
-                          <span className="text-xs font-medium leading-tight line-clamp-2" style={{ color: "var(--text-secondary)" }}>{p.ubicacion}</span>
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border w-fit"
-                          style={{ backgroundColor: fpConfig.bg, borderColor: fpConfig.border }}>
-                          <FpIcon className="w-3 h-3 shrink-0" style={{ color: fpConfig.color }} />
-                          <span className="text-xs font-bold" style={{ color: fpConfig.color }}>{fpConfig.label}</span>
-                        </div>
-                      </div>
+                      {(() => {
+                        const isChecked = checkedFolios.has(p.folio);
+                        return (
+                          <div className="grid gap-4 items-center px-5 py-4"
+                            style={{
+                              gridTemplateColumns: GRID_COLS,
+                              borderBottom: isLast ? "none" : "1px solid var(--border-color)",
+                            }}>
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
+                              <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{p.folio}</span>
+                            </div>
+                            <span className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>{p.cliente}</span>
+                            <span className="text-sm font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>{fmt(p.monto)}</span>
+                            <div className="flex items-start gap-1.5 min-w-0">
+                              <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: "var(--text-muted)" }} />
+                              <span className="text-xs font-medium leading-tight line-clamp-2" style={{ color: "var(--text-secondary)" }}>{p.ubicacion}</span>
+                            </div>
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border w-fit"
+                              style={{ backgroundColor: fpConfig.bg, borderColor: fpConfig.border }}>
+                              <FpIcon className="w-3 h-3 shrink-0" style={{ color: fpConfig.color }} />
+                              <span className="text-xs font-bold" style={{ color: fpConfig.color }}>{fpConfig.label}</span>
+                            </div>
+                            {/* Checkbox */}
+                            <motion.button
+                              onClick={() => toggleCheck(p.folio)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.86 }}
+                              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors duration-150"
+                              style={{
+                                backgroundColor: isChecked ? "#10B981" : "var(--bg-tertiary)",
+                                borderColor: isChecked ? "#10B981" : "var(--border-hover)",
+                                boxShadow: isChecked ? "0 0 0 4px rgba(16,185,129,0.20), 0 2px 8px rgba(16,185,129,0.30)" : "none",
+                              }}
+                            >
+                              <AnimatePresence initial={false}>
+                                {isChecked ? (
+                                  <motion.span key="check"
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
+                                    exit={{ scale: 0, opacity: 0 }}
+                                    transition={{ type: "spring", stiffness: 600, damping: 28 }}
+                                  >
+                                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                                  </motion.span>
+                                ) : (
+                                  <motion.span key="empty"
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.1 }}
+                                  >
+                                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} style={{ color: "var(--text-muted)" }} />
+                                  </motion.span>
+                                )}
+                              </AnimatePresence>
+                            </motion.button>
+                          </div>
+                        );
+                      })()}
                     </motion.div>
                   );
                 })}

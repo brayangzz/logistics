@@ -19,7 +19,8 @@ export interface Chofer {
 
 export function useCaja() {
   const [choferes, setChoferes] = useState<Chofer[]>(cajaChoferes);
-  const [selectedId, setSelectedId] = useState<string>("CR");
+  const firstPending = cajaChoferes.find(c => !c.entregado)?.id ?? cajaChoferes[0].id;
+  const [selectedId, setSelectedId] = useState<string>(firstPending);
 
   const selected = choferes.find((c) => c.id === selectedId) ?? choferes[0];
 
