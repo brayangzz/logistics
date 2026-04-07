@@ -59,7 +59,7 @@ const USERS: Record<string, { password: string; user: AuthUser }> = {
       roleLabel: "Administrador",
     },
   },
-  caja: {
+  cajas: {
     password: "123",
     user: {
       id: "5",
