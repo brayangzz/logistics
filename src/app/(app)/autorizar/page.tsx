@@ -14,15 +14,14 @@ const DRIVERS: Driver[] = autorizarDrivers as Driver[];
 
 export default function AutorizarPage() {
   const [authorizedDrivers, setAuthorizedDrivers] = useState<Set<string>>(new Set());
-  const [hoveredCard, setHoveredCard]             = useState<string | null>(null);
-  const [activeTab, setActiveTab]                 = useState<FilterTab>("pendientes");
-  const [search, setSearch]                       = useState("");
-  const [searchFocused, setSearchFocused]         = useState(false);
-  const [scanningDriver, setScanningDriver]       = useState<Driver | null>(null);
+  const [activeTab, setActiveTab] = useState<FilterTab>("pendientes");
+  const [search, setSearch] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [scanningDriver, setScanningDriver] = useState<Driver | null>(null);
 
   const today = format(new Date(), "EEEE d 'de' MMMM, yyyy", { locale: es });
   const pendienteCount = DRIVERS.filter((d) => !authorizedDrivers.has(d.id)).length;
-  const enRutaCount    = authorizedDrivers.size;
+  const enRutaCount = authorizedDrivers.size;
 
   const handleScanComplete = () => {
     if (scanningDriver) {
@@ -80,7 +79,7 @@ export default function AutorizarPage() {
             style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}>
             {([
               { key: "pendientes", label: "Pendientes", count: pendienteCount, dot: "#F59E0B" },
-              { key: "en_ruta",    label: "En ruta",    count: enRutaCount,    dot: "#10B981" },
+              { key: "en_ruta", label: "En ruta", count: enRutaCount, dot: "#10B981" },
             ] as { key: FilterTab; label: string; count: number; dot: string }[]).map((tab) => {
               const isActive = activeTab === tab.key;
               return (
@@ -116,11 +115,18 @@ export default function AutorizarPage() {
         </div>
 
         {/* Grid de Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
-          <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5"
+            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}
+          >
             {filtered.length === 0 ? (
-              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="col-span-full flex flex-col items-center justify-center py-16 gap-3">
+              <div className="col-span-full flex flex-col items-center justify-center py-16 gap-3">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
                   style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }}>
                   {activeTab === "en_ruta"
@@ -131,25 +137,19 @@ export default function AutorizarPage() {
                 <p className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
                   {activeTab === "en_ruta" ? "No hay choferes en ruta aún" : "Todos los choferes autorizados"}
                 </p>
-              </motion.div>
+              </div>
             ) : (
-              filtered.map((driver, index) => (
-                <motion.div key={driver.id} layout initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.94 }} transition={{ duration: 0.28, delay: index * 0.05 }}
-                  className="flex flex-col h-full">
-                  <AuthDriverCard
-                    driver={driver}
-                    isAuthorized={authorizedDrivers.has(driver.id)}
-                    isHovered={hoveredCard === driver.id}
-                    onHoverStart={() => setHoveredCard(driver.id)}
-                    onHoverEnd={() => setHoveredCard(null)}
-                    onScan={() => setScanningDriver(driver)}
-                  />
-                </motion.div>
+              filtered.map((driver) => (
+                <AuthDriverCard
+                  key={driver.id}
+                  driver={driver}
+                  isAuthorized={authorizedDrivers.has(driver.id)}
+                  onScan={() => setScanningDriver(driver)}
+                />
               ))
             )}
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Summary */}
         <AnimatePresence>

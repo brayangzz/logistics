@@ -306,6 +306,7 @@ export default function LoginPage() {
     const ok = await login(username, password);
 
     if (ok) {
+      redirected.current = true;
       setSuccessUser(
         username === "chofer"  ? "Carlos Ramírez"
         : username === "guardia" ? "Guardia Control"

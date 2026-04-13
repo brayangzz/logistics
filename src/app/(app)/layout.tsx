@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 
 const ROLE_GUARD: Record<string, string[]> = {
   "/chofer":            ["chofer"],
+  "/logistics2":        ["logistica"],
   "/logistics":         ["logistica"],
   "/asignar":           ["logistica"],
   "/unidades":          ["logistica"],

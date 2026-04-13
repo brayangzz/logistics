@@ -18,14 +18,21 @@ interface Props {
   choferes: Chofer[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onFilterChange?: (firstId: string | null) => void;
 }
 
-export function CajaChoferPanel({ choferes, selectedId, onSelect }: Props) {
+export function CajaChoferPanel({ choferes, selectedId, onSelect, onFilterChange }: Props) {
   const [filtro, setFiltro] = useState<"pendientes" | "entregados">("pendientes");
 
   const choferesFiltrados = choferes.filter(ch =>
     filtro === "pendientes" ? !ch.entregado : ch.entregado
   );
+
+  const handleFiltro = (key: "pendientes" | "entregados") => {
+    setFiltro(key);
+    const filtered = choferes.filter(ch => key === "pendientes" ? !ch.entregado : ch.entregado);
+    onFilterChange?.(filtered[0]?.id ?? null);
+  };
 
   return (
     <div className="lg:sticky lg:top-6 flex flex-col gap-3">
@@ -56,7 +63,7 @@ export function CajaChoferPanel({ choferes, selectedId, onSelect }: Props) {
         ] as const).map((op) => {
           const active = filtro === op.key;
           return (
-            <button key={op.key} onClick={() => setFiltro(op.key)}
+            <button key={op.key} onClick={() => handleFiltro(op.key)}
               className="relative flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl text-[11px] font-bold focus:outline-none whitespace-nowrap"
               style={{ color: active ? "#fff" : "var(--text-muted)" }}>
               {active && (

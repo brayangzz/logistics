@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { Driver } from "../unidades.types";
 
-export const AVATAR: Record<string, { bg: string; color: string }> = {
-  CR: { bg: "#6366F1", color: "#fff" },
-  MT: { bg: "#10B981", color: "#fff" },
-  JH: { bg: "#8B5CF6", color: "#fff" },
-  RD: { bg: "#F59E0B", color: "#fff" },
-  AV: { bg: "#155DFC", color: "#fff" },
+const PALETTE = ["#6366F1", "#10B981", "#155DFC", "#8B5CF6", "#F59E0B", "#0EA5E9"];
+export const av = (i: string): { bg: string; color: string } => {
+  const code = (i.charCodeAt(0) ?? 0) + (i.charCodeAt(1) ?? 0);
+  return { bg: PALETTE[code % PALETTE.length], color: "#fff" };
 };
-export const av = (i: string) => AVATAR[i] ?? { bg: "#64748B", color: "#fff" };
 
 interface Props {
   driver: Driver;

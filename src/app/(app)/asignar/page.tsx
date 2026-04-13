@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, Map as MapIcon, TrendingUp } from "lucide-react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { FilterState, ViewMode } from "./asignar.types";
 import { OrderAssignmentCard } from "./components/OrderAssignmentCard";
 import { ToastContainer } from "./components/SuccessToast";
@@ -39,7 +39,7 @@ export default function AsignarPage() {
         {/* Header */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="flex items-center justify-center w-11 h-11 rounded-2xl shrink-0"
+            <div className="flex items-center justify-center w-11 h-11 rounded-full shrink-0"
               style={{ background: "linear-gradient(135deg,#155DFC,#2563EB)", boxShadow: "0 0 20px rgba(21,93,252,0.28)" }}>
               <MapIcon className="w-5 h-5 text-white" />
             </div>
@@ -203,16 +203,22 @@ export default function AsignarPage() {
         </AnimatePresence>
 
         {/* Grid de órdenes */}
-        <LayoutGroup>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 items-stretch" style={{ overflow: "visible" }}>
-            <AnimatePresence mode="popLayout">
-              {filtered.map((order, i) => (
-                <OrderAssignmentCard key={order.id} order={order} onAssign={handleAssign}
-                  onToast={handleToast} index={i} />
-              ))}
-            </AnimatePresence>
-          </div>
-        </LayoutGroup>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={viewMode}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 items-stretch"
+            style={{ overflow: "visible" }}
+          >
+            {filtered.map((order, i) => (
+              <OrderAssignmentCard key={order.id} order={order} onAssign={handleAssign}
+                onToast={handleToast} index={i} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Empty state */}
         <AnimatePresence>

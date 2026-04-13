@@ -14,16 +14,18 @@ export default function CajaPage() {
     activosCount,
   } = useCaja();
 
-  const [checkedFolios, setCheckedFolios] = useState<Set<string>>(new Set());
-  useEffect(() => { setCheckedFolios(new Set()); }, [selectedId]);
+  const [checkedFolios, setCheckedFolios] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    setCheckedFolios({});
+  }, [selectedId]);
   const toggleCheck = (folio: string) =>
-    setCheckedFolios(prev => {
-      const next = new Set(prev);
-      next.has(folio) ? next.delete(folio) : next.add(folio);
-      return next;
-    });
+    setCheckedFolios(prev => ({ ...prev, [folio]: !prev[folio] }));
 
   const totalMonto = selected.pedidos.reduce((s, p) => s + p.monto, 0);
+  const totalCredito = selected.pedidos.filter(p => p.formaPago === "credito").reduce((s, p) => s + p.monto, 0);
+  const totalTransferencia = selected.pedidos.filter(p => p.formaPago === "transferencia").reduce((s, p) => s + p.monto, 0);
+  const totalEfectivo = selected.pedidos.filter(p => p.formaPago === "efectivo").reduce((s, p) => s + p.monto, 0);
+  const checkedCount = selected.pedidos.filter(p => !!checkedFolios[p.folio]).length;
 
   const handleSelect = (id: string) => setSelectedId(id);
 
@@ -54,7 +56,8 @@ export default function CajaPage() {
 
         {/* Sidebar */}
         <div className="lg:col-span-4 xl:col-span-3">
-          <CajaChoferPanel choferes={choferes} selectedId={selectedId} onSelect={handleSelect} />
+          <CajaChoferPanel choferes={choferes} selectedId={selectedId} onSelect={handleSelect}
+            onFilterChange={(id) => { if (id) setSelectedId(id); }} />
         </div>
 
         {/* Panel central */}
@@ -63,11 +66,14 @@ export default function CajaPage() {
             selected={selected} selectedId={selectedId}
             totalMonto={totalMonto} cancelarPedido={cancelarPedido}
             checkedFolios={checkedFolios} toggleCheck={toggleCheck}
+            entregado={selected.entregado}
           />
           <CajaSummaryActions
-            totalMonto={totalMonto} entregado={selected.entregado}
+            totalEfectivo={totalEfectivo} totalCredito={totalCredito} totalTransferencia={totalTransferencia}
+            entregado={selected.entregado}
             marcarEntregado={marcarEntregado} revertirEntregado={revertirEntregado}
-            checkedCount={checkedFolios.size} totalCount={selected.pedidos.length}
+            checkedCount={checkedCount}
+            totalCount={selected.pedidos.length}
           />
         </div>
 

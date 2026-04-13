@@ -31,11 +31,12 @@ interface Props {
   selectedId: string;
   totalMonto: number;
   cancelarPedido: (folio: string) => void;
-  checkedFolios: Set<string>;
+  checkedFolios: Record<string, boolean>;
   toggleCheck: (folio: string) => void;
+  entregado?: boolean;
 }
 
-export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPedido, checkedFolios, toggleCheck }: Props) {
+export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPedido, checkedFolios, toggleCheck, entregado }: Props) {
   const [cancelConfirm, setCancelConfirm] = useState<string | null>(null);
 
   return (
@@ -224,12 +225,15 @@ export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPed
                       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, x: -12 }}
                       transition={{ duration: 0.22, ease: "easeOut" }}>
                       {(() => {
-                        const isChecked = checkedFolios.has(p.folio);
+                        const isChecked = entregado ? true : !!checkedFolios[p.folio];
+                        const isCredito = p.formaPago === "credito";
                         return (
                           <div className="grid gap-4 items-center px-5 py-4"
                             style={{
                               gridTemplateColumns: GRID_COLS,
                               borderBottom: isLast ? "none" : "1px solid var(--border-color)",
+                              opacity: (isChecked && !entregado) ? 0.55 : 1,
+                              transition: "opacity 0.25s ease",
                             }}>
                             <div className="flex items-center gap-2">
                               <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-muted)" }} />
@@ -248,35 +252,26 @@ export function CajaPedidosTable({ selected, selectedId, totalMonto, cancelarPed
                             </div>
                             {/* Checkbox */}
                             <motion.button
-                              onClick={() => toggleCheck(p.folio)}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.86 }}
-                              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors duration-150"
+                              onClick={() => !entregado && toggleCheck(p.folio)}
+                              whileHover={entregado ? {} : { scale: 1.1 }}
+                              whileTap={entregado ? {} : { scale: 0.86 }}
+                              className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 border-2"
                               style={{
                                 backgroundColor: isChecked ? "#10B981" : "var(--bg-tertiary)",
                                 borderColor: isChecked ? "#10B981" : "var(--border-hover)",
                                 boxShadow: isChecked ? "0 0 0 4px rgba(16,185,129,0.20), 0 2px 8px rgba(16,185,129,0.30)" : "none",
+                                cursor: entregado ? "default" : "pointer",
+                                transition: "background-color 0.2s, border-color 0.2s, box-shadow 0.2s",
                               }}
                             >
-                              <AnimatePresence initial={false}>
-                                {isChecked ? (
-                                  <motion.span key="check"
-                                    initial={{ scale: 0, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
-                                    exit={{ scale: 0, opacity: 0 }}
-                                    transition={{ type: "spring", stiffness: 600, damping: 28 }}
-                                  >
-                                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                                  </motion.span>
-                                ) : (
-                                  <motion.span key="empty"
-                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.1 }}
-                                  >
-                                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} style={{ color: "var(--text-muted)" }} />
-                                  </motion.span>
-                                )}
-                              </AnimatePresence>
+                              <Check
+                                className="w-3.5 h-3.5"
+                                strokeWidth={isChecked ? 3 : 2.5}
+                                style={{
+                                  color: isChecked ? "#fff" : "var(--text-muted)",
+                                  transition: "color 0.2s",
+                                }}
+                              />
                             </motion.button>
                           </div>
                         );

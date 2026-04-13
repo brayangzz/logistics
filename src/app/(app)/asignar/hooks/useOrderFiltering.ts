@@ -16,7 +16,9 @@ export const useOrderFiltering = () => {
 
   const handleAssign = useCallback((orderId: string, driverId: string) =>
     setOrders(prev => prev.map(o =>
-      o.id === orderId ? { ...o, assignedDriver: driverId, state: "Asignado" } : o
+      o.id === orderId
+        ? { ...o, assignedDriver: driverId || undefined, state: driverId ? "Asignado" : "Pendiente" }
+        : o
     ))
   , []);
 

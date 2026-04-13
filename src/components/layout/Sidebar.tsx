@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
+  LayoutGrid,
   Truck,
   LogOut,
   Menu,
@@ -26,6 +27,14 @@ const NAV_ITEMS = [
     label: "Logística",
     icon: LayoutDashboard,
     matchPrefix: "/logistics",
+    exactMatch: true,
+    roles: ["logistica"],
+  },
+  {
+    path: "/logistics2",
+    label: "Logística 2",
+    icon: LayoutGrid,
+    matchPrefix: "/logistics2",
     roles: ["logistica"],
   },
   {
@@ -217,7 +226,9 @@ const SidebarContent = ({
         </p>
 
         {visibleItems.map((item) => {
-          const isActive = pathname.startsWith(item.matchPrefix);
+          const isActive = (item as { exactMatch?: boolean }).exactMatch
+            ? pathname === item.matchPrefix || pathname.startsWith(item.matchPrefix + "/")
+            : pathname.startsWith(item.matchPrefix);
 
           return (
             <Link key={item.path} href={item.path} onClick={onClose}>

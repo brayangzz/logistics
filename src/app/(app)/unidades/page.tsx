@@ -2,20 +2,10 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { Truck, Search, X, Gauge } from "lucide-react";
-import { Unit, StatusFilter } from "./unidades.types";
+import { Truck, Search, X, Gauge, AlertCircle } from "lucide-react";
+import { StatusFilter } from "./unidades.types";
 import { UnitCard } from "./components/UnitCard";
-
-const INITIAL_UNITS: Unit[] = [
-  { id: "u1", numero: 1, modelo: "Kenworth T800",        placa: "ABZ-1234", choferId: "d1", gasolina: 78, estado: "asignado"      },
-  { id: "u2", numero: 2, modelo: "Freightliner M2",       placa: "CDE-5678", choferId: null, gasolina: 45, estado: "disponible"    },
-  { id: "u3", numero: 3, modelo: "International LT",      placa: "FGH-9012", choferId: null, gasolina: 20, estado: "mantenimiento" },
-  { id: "u4", numero: 4, modelo: "Kenworth T370",         placa: "IJK-3456", choferId: "d2", gasolina: 92, estado: "asignado"      },
-  { id: "u5", numero: 5, modelo: "Freightliner Cascadia", placa: "LMN-7890", choferId: null, gasolina: 60, estado: "disponible"    },
-  { id: "u6", numero: 6, modelo: "Peterbilt 579",         placa: "OPQ-2345", choferId: "d3", gasolina: 55, estado: "asignado"      },
-  { id: "u7", numero: 7, modelo: "Volvo VNL 760",         placa: "RST-6789", choferId: null, gasolina: 12, estado: "mantenimiento" },
-  { id: "u8", numero: 8, modelo: "Mack Anthem",           placa: "UVW-0123", choferId: null, gasolina: 83, estado: "disponible"    },
-];
+import { useUnidadesData } from "./hooks/useUnidadesData";
 
 const FILTERS: { key: StatusFilter; label: string; dot: string | null }[] = [
   { key: "Todos",         label: "Todas",         dot: null      },
@@ -25,14 +15,14 @@ const FILTERS: { key: StatusFilter; label: string; dot: string | null }[] = [
 ];
 
 export default function UnidadesPage() {
-  const [units,         setUnits]         = useState<Unit[]>(INITIAL_UNITS);
+  const { units, drivers, loading, error, setUnits } = useUnidadesData();
   const [search,        setSearch]        = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [statusFilter,  setStatusFilter]  = useState<StatusFilter>("Todos");
 
-  const handleUpdate = useCallback((id: string, patch: Partial<Unit>) => {
+  const handleUpdate = useCallback((id: string, patch: Partial<typeof units[number]>) => {
     setUnits(prev => prev.map(u => u.id === id ? { ...u, ...patch } : u));
-  }, []);
+  }, [setUnits]);
 
   const counts = useMemo(() => ({
     Todos:         units.length,
@@ -59,7 +49,7 @@ export default function UnidadesPage() {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-b from-[#155DFC] to-blue-700 shadow-[0_0_20px_rgba(21,93,252,0.3)] shrink-0">
+            <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-linear-to-b from-[#155DFC] to-blue-700 shadow-[0_0_20px_rgba(21,93,252,0.3)] shrink-0">
               <Gauge className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -107,7 +97,7 @@ export default function UnidadesPage() {
           <div className="hidden sm:block w-px h-7 shrink-0" style={{ backgroundColor: "var(--border-color)" }} />
 
           {/* Search */}
-          <div className="relative flex-1 sm:min-w-[260px] sm:max-w-[360px] rounded-2xl"
+          <div className="relative flex-1 sm:min-w-65 sm:max-w-90 rounded-2xl"
             style={{ boxShadow: searchFocused ? "0 0 0 3px rgba(21,93,252,0.14)" : "none", transition: "box-shadow 0.15s ease" }}>
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "var(--text-muted)" }} />
             <input type="text" placeholder="Buscar unidad, modelo o placa…"
@@ -131,32 +121,54 @@ export default function UnidadesPage() {
           </div>
         </div>
 
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-72 rounded-3xl animate-pulse"
+                style={{ backgroundColor: "var(--bg-secondary)", border: "1px solid var(--border-color)" }} />
+            ))}
+          </div>
+        )}
+
+        {/* Error */}
+        {error && !loading && (
+          <div className="flex flex-col items-center justify-center py-24 rounded-3xl border"
+            style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}>
+            <AlertCircle className="w-12 h-12 mb-4 opacity-30" style={{ color: "#EF4444" }} />
+            <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Error al cargar unidades</p>
+            <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{error}</p>
+          </div>
+        )}
+
         {/* Grid */}
-        <AnimatePresence mode="wait">
-          {filtered.length === 0 ? (
-            <motion.div key="empty"
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="flex flex-col items-center justify-center py-24 rounded-3xl border"
-              style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}>
-              <Truck className="w-12 h-12 mb-4 opacity-20" style={{ color: "var(--text-muted)" }} />
-              <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>No se encontraron unidades</p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Intenta con otro filtro o búsqueda</p>
-            </motion.div>
-          ) : (
-            <LayoutGroup>
-              <motion.div key="grid"
-                className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-                style={{ alignItems: "start" }}>
-                <AnimatePresence mode="popLayout">
-                  {filtered.map((unit, i) => (
-                    <UnitCard key={unit.id} unit={unit} index={i} onUpdate={handleUpdate} />
-                  ))}
-                </AnimatePresence>
+        {!loading && !error && (
+          <AnimatePresence>
+            {filtered.length === 0 ? (
+              <motion.div key="empty"
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex flex-col items-center justify-center py-24 rounded-3xl border"
+                style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-color)" }}>
+                <Truck className="w-12 h-12 mb-4 opacity-20" style={{ color: "var(--text-muted)" }} />
+                <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>No se encontraron unidades</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Intenta con otro filtro o búsqueda</p>
               </motion.div>
-            </LayoutGroup>
-          )}
-        </AnimatePresence>
+            ) : (
+              <LayoutGroup>
+                <motion.div key="grid"
+                  className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                  style={{ alignItems: "start" }}>
+                  <AnimatePresence mode="popLayout">
+                    {filtered.map((unit, i) => (
+                      <UnitCard key={unit.id} unit={unit} index={i} onUpdate={handleUpdate} drivers={drivers} />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </LayoutGroup>
+            )}
+          </AnimatePresence>
+        )}
 
       </div>
     </div>
